@@ -22,6 +22,7 @@ export const NAV_ITEMS: NavItemConfig[] = [
   { key: 'calendar', path: '/calendar', group: 'operations', ar: 'التقويم الموحد', en: 'Calendar' },
 
   { key: 'production', path: '/production', group: 'creative', ar: 'الإنتاج والتصوير', en: 'Media Production' },
+  { key: 'studio3d', path: '/studio-3d', group: 'creative', ar: 'الاستوديو ثلاثي الأبعاد', en: '3D Studio Twin' },
   { key: 'editing', path: '/editing', group: 'creative', ar: 'المونتاج', en: 'Video Editing' },
   { key: 'design', path: '/design', group: 'creative', ar: 'التصميم الجرافيكي', en: 'Graphic Design' },
   { key: 'marketing', path: '/marketing', group: 'creative', ar: 'التسويق والمحتوى', en: 'Marketing' },

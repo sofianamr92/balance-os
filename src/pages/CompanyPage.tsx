@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Building2, GitBranch, Plus, Shield, UserPlus, Users } from 'lucide-react';
 import { useOS } from '../context/OSContext';
 import {
@@ -14,7 +14,11 @@ import { formatEGP, toPiasters } from '../utils/accounting';
 import { DEFAULT_ROLE_MATRIX, ROLE_LABELS } from '../utils/rbac';
 import type { RoleId } from '../types/os';
 
-export function CompanyPage() {
+export function CompanyPage({
+  defaultTab = 'overview',
+}: {
+  defaultTab?: 'overview' | 'branches' | 'departments' | 'org' | 'rbac';
+}) {
   const {
     data,
     lang,
@@ -26,7 +30,10 @@ export function CompanyPage() {
     invitations,
   } = useOS();
 
-  const [tab, setTab] = useState<'overview' | 'branches' | 'departments' | 'org' | 'rbac'>('overview');
+  const [tab, setTab] = useState<'overview' | 'branches' | 'departments' | 'org' | 'rbac'>(defaultTab);
+  useEffect(() => {
+    setTab(defaultTab);
+  }, [defaultTab]);
   const [companyName, setCompanyName] = useState(data.company.name);
   const [legalName, setLegalName] = useState(data.company.legalName);
   const [taxId, setTaxId] = useState(data.company.taxId);

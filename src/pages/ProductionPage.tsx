@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Camera, Plus, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Box, Camera, Plus, AlertCircle } from 'lucide-react';
 import { useOS } from '../context/OSContext';
 import {
   PageHeader,
@@ -15,6 +16,7 @@ import type { Shoot } from '../types/os';
 
 export function ProductionPage() {
   const { data, lang, currentUser, activeBranchId, createShoot, updateShootStatus, reserveEquipment } = useOS();
+  const navigate = useNavigate();
   const [shootModal, setShootModal] = useState(false);
   const [equipModal, setEquipModal] = useState(false);
 
@@ -88,6 +90,14 @@ export function ProductionPage() {
         }
         actions={
           <>
+            <button
+              type="button"
+              onClick={() => navigate('/studio-3d')}
+              className={btnSecondaryCls}
+            >
+              <Box className="w-4 h-4" />
+              <span>{lang === 'ar' ? 'الاستوديو ثلاثي الأبعاد' : '3D Studio Twin'}</span>
+            </button>
             <button
               type="button"
               onClick={() => {

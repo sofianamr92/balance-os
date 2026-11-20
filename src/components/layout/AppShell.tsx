@@ -6,6 +6,7 @@ import {
   Bell,
   BookOpen,
   Bot,
+  Box,
   Briefcase,
   Building2,
   Calendar,
@@ -46,6 +47,8 @@ import type { ModuleKey, RoleId } from '../../types/os';
 import { hasPermission, ROLE_LABELS } from '../../utils/rbac';
 import { Modal, inputCls, btnPrimaryCls, btnSecondaryCls } from '../common/UIPrimitives';
 import { toPiasters } from '../../utils/accounting';
+import { PWAInstallButton } from '../pwa/PWAInstallButton';
+import { OfflineIndicator } from '../pwa/OfflineIndicator';
 
 const MODULE_ICONS: Record<ModuleKey, React.ComponentType<{ className?: string }>> = {
   dashboard: LayoutDashboard,
@@ -58,6 +61,7 @@ const MODULE_ICONS: Record<ModuleKey, React.ComponentType<{ className?: string }
   tasks: CheckSquare,
   calendar: Calendar,
   production: Clapperboard,
+  studio3d: Box,
   editing: Video,
   design: Palette,
   marketing: Megaphone,
@@ -401,6 +405,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             )}
 
             {/* Quick Create */}
+            <PWAInstallButton />
             <button
               type="button"
               onClick={() => setQuickCreateOpen(true)}
@@ -510,6 +515,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
         </header>
+
+        <OfflineIndicator />
 
         {/* Demo Sandbox Banner */}
         {isDemoMode && (

@@ -230,6 +230,26 @@
       },
       "required": ["id", "actorUid", "action", "entity", "entityId", "summary", "ownerUid", "memberUids", "createdAt"]
     },
+    "Notification": {
+      "title": "Notification",
+      "description": "User operational or workflow notification.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "recipientUid": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "body": { "type": "string", "maxLength": 500 },
+        "category": { "type": "string", "enum": ["task", "approval", "finance", "hr", "production", "system"] },
+        "read": { "type": "boolean" },
+        "actionRoute": { "type": "string", "maxLength": 128 },
+        "isDemo": { "type": "boolean" },
+        "ownerUid": { "type": "string", "maxLength": 128 },
+        "memberUids": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "recipientUid", "title", "body", "category", "read", "actionRoute", "ownerUid", "memberUids", "createdAt", "updatedAt"]
+    },
     "ModuleRecord": {
       "title": "ModuleRecord",
       "description": "Generic validated operational entity record for BALANCE OS modules.",
@@ -286,7 +306,7 @@
     "/workflows/{workflowId}": { "schema": { "$ref": "#/entities/ModuleRecord" }, "description": "Workflow automation rules." },
     "/workflowLogs/{logId}": { "schema": { "$ref": "#/entities/ModuleRecord" }, "description": "Automation execution logs." },
     "/approvals/{approvalId}": { "schema": { "$ref": "#/entities/ModuleRecord" }, "description": "Centralized approval requests." },
-    "/notifications/{notificationId}": { "schema": { "$ref": "#/entities/ModuleRecord" }, "description": "User notifications." },
+    "/notifications/{notificationId}": { "schema": { "$ref": "#/entities/Notification" }, "description": "User notifications." },
     "/auditLogs/{logId}": { "schema": { "$ref": "#/entities/AuditLog" }, "description": "Immutable system audit log." }
   }
 }

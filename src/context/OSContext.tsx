@@ -541,6 +541,41 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
             }
           }
         }
+
+        if (isFounder) {
+          const base = EMPTY_DATASET(user.uid);
+          const [wfSnap, srvSnap] = await Promise.all([
+            getDoc(doc(db, 'workflows', 'wf-1')),
+            getDoc(doc(db, 'services', 'srv-photo')),
+          ]);
+          if (!wfSnap.exists()) {
+            await Promise.all(
+              base.workflows.map((wf) =>
+                setDoc(doc(db, 'workflows', wf.id), {
+                  ...stripUndefined(wf as unknown as Record<string, unknown>),
+                  ownerUid: user.uid,
+                  memberUids: [user.uid],
+                  createdAt: serverTimestamp(),
+                  updatedAt: serverTimestamp(),
+                })
+              )
+            );
+          }
+          if (!srvSnap.exists()) {
+            await Promise.all(
+              base.services.map((srv) =>
+                setDoc(doc(db, 'services', srv.id), {
+                  ...stripUndefined(srv as unknown as Record<string, unknown>),
+                  ownerUid: user.uid,
+                  memberUids: [user.uid],
+                  createdAt: serverTimestamp(),
+                  updatedAt: serverTimestamp(),
+                })
+              )
+            );
+          }
+        }
+
         setData(EMPTY_DATASET(user.uid));
       } catch (err) {
         handleFirestoreError(err, OperationType.WRITE, 'users/bootstrap');
@@ -677,7 +712,10 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
     );
     subscribeCol<ApprovalRequest>('approvals', (items) => setData((p) => ({ ...p, approvals: items })));
     subscribeCol<NotificationItem>('notifications', (items) =>
-      setData((p) => ({ ...p, notifications: items }))
+      setData((p) => ({
+        ...p,
+        notifications: [...items].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+      }))
     );
     if (isFounder) {
       subscribeCol<AuditLogItem>('auditLogs', (items) => setData((p) => ({ ...p, auditLogs: items })), false);
@@ -996,25 +1034,45 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
         });
       }
 
+      const ranIds = new Set(candidates.filter((c) => c.shouldExecute).map((c) => c.rule.id));
+
+      if (!isDemoMode && authUser) {
+        const writeOps: Array<Promise<void>> = [];
+        for (const t of newTasks) {
+          const fsTask = { ...t };
+          delete fsTask.revisions;
+          delete fsTask.comments;
+          writeOps.push(fsCreate('tasks', t.id, fsTask as unknown as Record<string, unknown>));
+        }
+        for (const log of newLogs) {
+          writeOps.push(fsCreate('workflowLogs', log.id, log as unknown as Record<string, unknown>));
+        }
+        for (const n of newNotifs) {
+          writeOps.push(fsCreate('notifications', n.id, n as unknown as Record<string, unknown>));
+        }
+        const isAdminUser =
+          authUser.email?.toLowerCase() === 'sofianamr92@gmail.com' ||
+          currentUser?.role === 'ceo' ||
+          currentUser?.role === 'general_manager';
+        if (isAdminUser) {
+          for (const wf of data.workflows) {
+            if (ranIds.has(wf.id)) {
+              writeOps.push(fsUpdate('workflows', wf.id, { runCount: wf.runCount + 1 }));
+            }
+          }
+        }
+        await Promise.all(writeOps);
+      }
+
       setData((p) => ({
         ...p,
         tasks: [...newTasks, ...p.tasks],
         notifications: [...newNotifs, ...p.notifications],
         workflowLogs: [...newLogs, ...p.workflowLogs],
-        workflows: p.workflows.map((w) => {
-          const ran = candidates.some((c) => c.rule.id === w.id && c.shouldExecute);
-          return ran ? { ...w, runCount: w.runCount + 1 } : w;
-        }),
+        workflows: p.workflows.map((w) => (ranIds.has(w.id) ? { ...w, runCount: w.runCount + 1 } : w)),
       }));
-
-      for (const log of newLogs) {
-        await fsCreate('workflowLogs', log.id, log as unknown as Record<string, unknown>);
-      }
-      for (const n of newNotifs) {
-        await fsCreate('notifications', n.id, n as unknown as Record<string, unknown>);
-      }
     },
-    [data.projects, data.workflowLogs, data.workflows, defaultMembers, fsCreate, isDemoMode, ownerId]
+    [authUser, currentUser?.role, data.projects, data.workflowLogs, data.workflows, defaultMembers, fsCreate, fsUpdate, isDemoMode, ownerId]
   );
 
   // --- CRM, Clients, Proposals, Contracts ---
@@ -1247,11 +1305,14 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
         ),
       }));
       await fsUpdate('proposals', proposalId, { status: decision, approverUid: ownerId });
+      for (const app of data.approvals.filter((a) => a.entityId === proposalId && a.status === 'pending')) {
+        await fsUpdate('approvals', app.id, { status: decision, approverUid: ownerId });
+      }
       await logAudit(`PROPOSAL_${decision.toUpperCase()}`, 'proposals', proposalId, `قرار عرض السعر ${prop.proposalNumber}: ${decision}`);
       pushToast('success', lang === 'ar' ? 'تم تحديث حالة العرض' : 'Proposal updated');
       return { ok: true };
     },
-    [currentUser, data.proposals, fsUpdate, lang, logAudit, ownerId, pushToast]
+    [currentUser, data.approvals, data.proposals, fsUpdate, lang, logAudit, ownerId, pushToast]
   );
 
   const createContractAndProject = useCallback(
@@ -2091,12 +2152,27 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
         ...(comment ? { approvalComment: comment } : {}),
         ...(newJe ? { journalEntryId: newJe.id } : {}),
       });
+      for (const app of data.approvals.filter((a) => a.entityId === expenseId && a.status === 'pending')) {
+        await fsUpdate('approvals', app.id, {
+          status: decision,
+          approverUid: ownerId,
+          ...(comment ? { comment } : {}),
+        });
+      }
+      if (decision === 'approved' && exp.projectId) {
+        const linkedProject = data.projects.find((pr) => pr.id === exp.projectId);
+        if (linkedProject) {
+          await fsUpdate('projects', linkedProject.id, {
+            actualCostPiasters: linkedProject.actualCostPiasters + exp.amountPiasters,
+          });
+        }
+      }
       if (newJe) await fsCreate('journalEntries', newJe.id, newJe as unknown as Record<string, unknown>);
       await logAudit(`EXPENSE_${decision.toUpperCase()}`, 'expenses', expenseId, `قرار المصروف: ${exp.description}`, exp.branchId);
       pushToast('success', lang === 'ar' ? (decision === 'approved' ? 'تم اعتماد المصروف وترحيل قيده' : 'تم رفض المصروف') : `Expense ${decision}`);
       return { ok: true };
     },
-    [currentUser, data.accounts, data.expenses, data.fiscalPeriods, data.journalEntries.length, defaultMembers, fsCreate, fsUpdate, isDemoMode, lang, logAudit, ownerId, pushToast]
+    [currentUser, data.accounts, data.approvals, data.expenses, data.fiscalPeriods, data.journalEntries.length, data.projects, defaultMembers, fsCreate, fsUpdate, isDemoMode, lang, logAudit, ownerId, pushToast]
   );
 
   const createTreasuryTransfer = useCallback(
@@ -2324,10 +2400,13 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
         approvals: p.approvals.map((a) => (a.entityId === leaveId ? { ...a, status: decision, approverUid: ownerId } : a)),
       }));
       await fsUpdate('leaveRequests', leaveId, { status: decision, approverUid: ownerId });
+      for (const app of data.approvals.filter((a) => a.entityId === leaveId && a.status === 'pending')) {
+        await fsUpdate('approvals', app.id, { status: decision, approverUid: ownerId });
+      }
       pushToast('success', lang === 'ar' ? 'تم تحديث طلب الإجازة' : 'Leave request updated');
       return { ok: true };
     },
-    [currentUser, data.leaveRequests, fsUpdate, lang, ownerId, pushToast]
+    [currentUser, data.approvals, data.leaveRequests, fsUpdate, lang, ownerId, pushToast]
   );
 
   const approvePayrollRun = useCallback(
@@ -2469,7 +2548,11 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
           a.id === approvalId ? { ...a, status: decision, approverUid: ownerId, comment } : a
         ),
       }));
-      await fsUpdate('approvals', approvalId, { status: decision, approverUid: ownerId });
+      await fsUpdate('approvals', approvalId, {
+        status: decision,
+        approverUid: ownerId,
+        ...(comment ? { comment } : {}),
+      });
       return { ok: true };
     },
     [currentUser, data.approvals, decideExpense, decideLeaveRequest, decideProposal, fsUpdate, ownerId, pushToast]
@@ -2481,9 +2564,33 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
         ...p,
         notifications: p.notifications.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
       }));
-      await fsUpdate('notifications', notificationId, { read: true });
+      if (isDemoMode || !authUser) return;
+
+      const notifRef = doc(db, 'notifications', notificationId);
+      let existsInFirestore = false;
+      try {
+        const snap = await getDoc(notifRef);
+        existsInFirestore = snap.exists();
+      } catch (err) {
+        handleFirestoreError(err, OperationType.GET, `notifications/${notificationId}`);
+      }
+
+      if (existsInFirestore) {
+        await fsUpdate('notifications', notificationId, { read: true });
+      } else {
+        const localNotif = data.notifications.find((n) => n.id === notificationId);
+        if (localNotif) {
+          await fsCreate('notifications', notificationId, {
+            ...localNotif,
+            read: true,
+            isDemo: false,
+            ownerUid: authUser.uid,
+            memberUids: localNotif.memberUids?.length ? localNotif.memberUids : [authUser.uid],
+          } as unknown as Record<string, unknown>);
+        }
+      }
     },
-    [fsUpdate]
+    [authUser, data.notifications, fsCreate, fsUpdate, isDemoMode]
   );
 
   const seedDemoInFirestore = useCallback(async () => {
@@ -2501,6 +2608,12 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
         delete clone.revisions;
         delete clone.comments;
         delete clone.cycleLabel;
+        if (typeof clone.projectId === 'string' && !clone.projectId.startsWith('demo-')) {
+          clone.projectId = `demo-${clone.projectId}`;
+        }
+        if (typeof clone.clientId === 'string' && !clone.clientId.startsWith('demo-')) {
+          clone.clientId = `demo-${clone.clientId}`;
+        }
         batch.set(doc(db, colName, `demo-${item.id}`), {
           ...stripUndefined(clone),
           id: `demo-${item.id}`,

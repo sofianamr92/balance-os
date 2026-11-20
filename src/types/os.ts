@@ -31,6 +31,7 @@ export type ModuleKey =
   | 'tasks'
   | 'calendar'
   | 'production'
+  | 'studio3d'
   | 'editing'
   | 'design'
   | 'marketing'

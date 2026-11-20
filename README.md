@@ -1,19 +1,27 @@
 # BALANCE OS — Enterprise Business Operating System
 
-**BALANCE OS** is the internal enterprise operating system for **BALANCE Agency** (Egypt · EGP · Arabic-first RTL + English LTR).
+Internal enterprise operating system for **BALANCE Agency (Egypt · EGP)** covering CRM & Sales, Clients, Proposals & Contracts, Projects & Tasks, Media Production, **3D Studio & Operations Twin (Three.js)**, Video Editing, Graphic Design, Marketing, Development, Double-Entry Accounting, Procurement & Assets, HR & Hybrid Attendance, Customer Support, File Library, Knowledge Base, Automation, and **BALANCE INTELLIGENCE (Gemini AI)**, with full **PWA** installability and bilingual **Arabic RTL / English LTR** support.
 
 ## Architecture Overview
+- **Frontend**: React 19, Vite 8, TypeScript, Tailwind CSS v4, Recharts, Three.js (`RoomEnvironment`, procedural PBR geometry, `OrbitControls`, `Raycaster`), `vite-plugin-pwa`.
+- **Backend**: Express (`server.ts`), Firebase Admin ID-token verification (`src/server/firebase-admin.ts`), server-side `@google/genai` proxy (`src/server/ai-service.ts`).
+- **Database & Auth**: Firebase Authentication (Google Workspace) + Cloud Firestore (`firebase-blueprint.json`, `firestore.rules`).
 
-- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS v4, React Router, Recharts, Lucide Icons.
-- **Backend**: Node.js + Express (`server.ts`) providing `/api/v1/health` and secure server-side Gemini AI endpoints (`/api/v1/ai/*`) verified via Firebase Admin ID tokens.
-- **Database & Auth**: Firebase Firestore (`ai-studio-f52d82cf-957f-4dc8-ba99-4cac09e19bb1`) + Firebase Authentication (Google Sign-In, invite-only onboarding, hardened `firestore.rules`).
-  - *Note on Cloud SQL*: Initial PostgreSQL provisioning via Cloud SQL returned `DEVELOPER_EDITION_QUOTA_PER_PROJECT_EXHAUSTED` (quota limit of 2 instances per project). Per environment policy, persistence was pivoted to Firebase Firestore while preserving the relational PostgreSQL schema specification in `docs/DATABASE_SCHEMA.md`.
-- **AI Intelligence**: `BALANCE INTELLIGENCE` powered by `@google/genai` (`gemini-4-hydrogen`) running exclusively on the server side.
+## Environment Variables
+Configure in AI Studio Secrets / `.env` (never commit real secrets):
+- `GEMINI_API_KEY`: Required on the backend for `/api/v1/ai/*` endpoints.
+- `APP_URL`: Runtime Cloud Run / hosting URL.
 
-## Quick Commands
+## Verification Commands
+```bash
+npm run lint
+npm run build
+npm run lint:rules
+npx --yes tsx --test src/utils/accounting.test.ts src/utils/workflows.test.ts src/utils/studio3d.test.ts
+```
 
-- `npm run dev` — Start Express + Vite dev server on port 3000.
-- `npm run build` — Build frontend bundle.
-- `npm run lint` — TypeScript strict check (`tsc --noEmit`).
-- `npm run lint:rules` — Lint `firestore.rules` with `@firebase/eslint-plugin-security-rules`.
-- `npx --yes tsx --test src/utils/*.test.ts` — Run unit tests for double-entry accounting, RBAC, and workflow validation.
+## Documentation
+- `/docs/SYSTEM_ARCHITECTURE.md`
+- `/docs/DATABASE_SCHEMA.md`
+- `/docs/FINANCIAL_RULES.md`
+- `/docs/RBAC_PERMISSION_MATRIX.md`

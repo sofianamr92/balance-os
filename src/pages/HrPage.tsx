@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Lock, Plus, ShieldCheck } from 'lucide-react';
 import { useOS } from '../context/OSContext';
@@ -16,7 +16,11 @@ import { formatEGP } from '../utils/accounting';
 import { canViewConfidentialPayroll, maskEmployeePII, ROLE_LABELS } from '../utils/rbac';
 import type { LeaveRequest } from '../types/os';
 
-export function HrPage() {
+export function HrPage({
+  defaultTab = 'employees',
+}: {
+  defaultTab?: 'employees' | 'attendance' | 'leaves' | 'payroll';
+}) {
   const {
     data,
     lang,
@@ -28,7 +32,10 @@ export function HrPage() {
     approvePayrollRun,
   } = useOS();
 
-  const [tab, setTab] = useState<'employees' | 'attendance' | 'leaves' | 'payroll'>('employees');
+  const [tab, setTab] = useState<'employees' | 'attendance' | 'leaves' | 'payroll'>(defaultTab);
+  useEffect(() => {
+    setTab(defaultTab);
+  }, [defaultTab]);
   const [leaveModal, setLeaveModal] = useState(false);
   const [leaveType, setLeaveType] = useState<LeaveRequest['leaveType']>('annual');
   const [startDate, setStartDate] = useState('2026-11-28');

@@ -253,6 +253,20 @@ service cloud.firestore {
         isValidMemberList(data.memberUids);
     }
 
+    function isValidNotification(data) {
+      return data.keys().hasAll(['id', 'recipientUid', 'title', 'body', 'category', 'read', 'actionRoute', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'recipientUid', 'title', 'body', 'category', 'read', 'actionRoute', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.recipientUid, 1, 128) &&
+        isValidString(data.title, 1, 200) &&
+        isValidString(data.body, 1, 500) &&
+        data.category in ['task', 'approval', 'finance', 'hr', 'production', 'system'] &&
+        data.read is bool &&
+        isValidString(data.actionRoute, 1, 128) &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
     function isValidGenericModuleRecord(data) {
       return data.keys().hasAll(['id', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
         data.size() <= 40 &&
@@ -389,7 +403,7 @@ service cloud.firestore {
     match /expenses/{expenseId} {
       allow get: if isValidId(expenseId) && canReadSingleResource();
       allow list: if canReadListResource();
-      allow create: if isValidId(expenseId) && isVerified() && isValidExpense(incoming()) && incoming().ownerUid == request.auth.uid && incoming().requesterUid == request.auth.uid && incoming().status == 'submitted' && isValidTimestampsCreate();
+      allow create: if isValidId(expenseId) && isVerified() && isValidExpense(incoming()) && incoming().ownerUid == request.auth.uid && ((incoming().requesterUid == request.auth.uid && incoming().status == 'submitted') || (isAdmin() && incoming().isDemo == true)) && isValidTimestampsCreate();
       allow update: if isValidId(expenseId) && isValidExpense(incoming()) && incoming().ownerUid == existing().ownerUid && incoming().requesterUid == existing().requesterUid && isValidTimestampsUpdate() && (
         (isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'approverUid', 'approvalComment', 'journalEntryId', 'updatedAt'])) ||
         (hasRole(['department_manager', 'branch_manager', 'accountant']) && request.auth.uid != existing().requesterUid && incoming().approverUid == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'approverUid', 'approvalComment', 'journalEntryId', 'updatedAt']))
@@ -431,6 +445,14 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /notifications/{notificationId} {
+      allow get: if isValidId(notificationId) && (canReadSingleResource() || isOwner(existing().recipientUid));
+      allow list: if canReadListResource() || (isVerified() && resource.data.recipientUid == request.auth.uid);
+      allow create: if isValidId(notificationId) && isVerified() && isValidNotification(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(notificationId) && isVerified() && (canReadSingleResource() || isOwner(existing().recipientUid)) && isValidNotification(incoming()) && incoming().ownerUid == existing().ownerUid && incoming().recipientUid == existing().recipientUid && isValidTimestampsUpdate() && incoming().diff(existing()).affectedKeys().hasOnly(['read', 'updatedAt']);
+      allow delete: if isValidId(notificationId) && (isAdmin() || isOwner(existing().recipientUid));
+    }
+
     // Operational Module Collections (Strict Owner/Member + Verified Gates)
     match /{colName}/{docId} {
       allow get: if colName in [
@@ -438,7 +460,7 @@ service cloud.firestore {
         'editingJobs', 'designJobs', 'marketingItems', 'devItems', 'chartOfAccounts',
         'invoices', 'payments', 'treasuryAccounts', 'treasuryTransfers',
         'procurementRequests', 'assets', 'attendanceRecords', 'leaveRequests',
-        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs', 'notifications'
+        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs'
       ] && isValidId(docId) && canReadSingleResource();
 
       allow list: if colName in [
@@ -446,7 +468,7 @@ service cloud.firestore {
         'editingJobs', 'designJobs', 'marketingItems', 'devItems', 'chartOfAccounts',
         'invoices', 'payments', 'treasuryAccounts', 'treasuryTransfers',
         'procurementRequests', 'assets', 'attendanceRecords', 'leaveRequests',
-        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs', 'notifications'
+        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs'
       ] && canReadListResource();
 
       allow create: if colName in [
@@ -454,7 +476,7 @@ service cloud.firestore {
         'editingJobs', 'designJobs', 'marketingItems', 'devItems', 'chartOfAccounts',
         'invoices', 'payments', 'treasuryAccounts', 'treasuryTransfers',
         'procurementRequests', 'assets', 'attendanceRecords', 'leaveRequests',
-        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs', 'notifications'
+        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs'
       ] && isValidId(docId) && isVerified() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
 
       allow update: if colName in [
@@ -462,7 +484,7 @@ service cloud.firestore {
         'editingJobs', 'designJobs', 'marketingItems', 'devItems', 'chartOfAccounts',
         'invoices', 'payments', 'treasuryAccounts', 'treasuryTransfers',
         'procurementRequests', 'assets', 'attendanceRecords', 'leaveRequests',
-        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs', 'notifications'
+        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs'
       ] && isValidId(docId) && canReadSingleResource() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate();
 
       allow delete: if colName in [
@@ -470,7 +492,7 @@ service cloud.firestore {
         'editingJobs', 'designJobs', 'marketingItems', 'devItems', 'chartOfAccounts',
         'invoices', 'payments', 'treasuryAccounts', 'treasuryTransfers',
         'procurementRequests', 'assets', 'attendanceRecords', 'leaveRequests',
-        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs', 'notifications'
+        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs'
       ] && isValidId(docId) && isAdmin();
     }
   }

@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { OSProvider, useOS } from './context/OSContext';
@@ -18,6 +18,9 @@ import { ProjectDetailPage, ProjectsPage } from './pages/ProjectsPage';
 import { TasksPage } from './pages/TasksPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { ProductionPage } from './pages/ProductionPage';
+const Studio3DPage = lazy(() =>
+  import('./pages/Studio3DPage').then((m) => ({ default: m.Studio3DPage }))
+);
 import {
   DesignPage,
   DevelopmentPage,
@@ -81,8 +84,13 @@ function AuthenticatedApp() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Guarded module="dashboard"><DashboardPage /></Guarded>} />
         <Route path="/workspace" element={<Guarded module="workspace"><WorkspacePage /></Guarded>} />
-        <Route path="/company" element={<Guarded module="company"><CompanyPage /></Guarded>} />
-        <Route path="/company/*" element={<Guarded module="company"><CompanyPage /></Guarded>} />
+        <Route path="/company" element={<Guarded module="company"><CompanyPage defaultTab="overview" /></Guarded>} />
+        <Route path="/company/branches" element={<Guarded module="company"><CompanyPage defaultTab="branches" /></Guarded>} />
+        <Route path="/company/departments" element={<Guarded module="company"><CompanyPage defaultTab="departments" /></Guarded>} />
+        <Route path="/company/teams" element={<Guarded module="company"><CompanyPage defaultTab="departments" /></Guarded>} />
+        <Route path="/company/org" element={<Guarded module="company"><CompanyPage defaultTab="org" /></Guarded>} />
+        <Route path="/company/rbac" element={<Guarded module="company"><CompanyPage defaultTab="rbac" /></Guarded>} />
+        <Route path="/company/*" element={<Guarded module="company"><CompanyPage defaultTab="overview" /></Guarded>} />
 
         <Route path="/crm" element={<Guarded module="crm"><CrmPage /></Guarded>} />
         <Route path="/crm/leads" element={<Guarded module="crm"><CrmPage /></Guarded>} />
@@ -98,6 +106,22 @@ function AuthenticatedApp() {
         <Route path="/calendar" element={<Guarded module="calendar"><CalendarPage /></Guarded>} />
 
         <Route path="/production" element={<Guarded module="production"><ProductionPage /></Guarded>} />
+        <Route
+          path="/studio-3d"
+          element={
+            <Guarded module="studio3d">
+              <Suspense
+                fallback={
+                  <div className="min-h-[420px] flex items-center justify-center text-xs text-[#667085]">
+                    Loading 3D Studio...
+                  </div>
+                }
+              >
+                <Studio3DPage />
+              </Suspense>
+            </Guarded>
+          }
+        />
         <Route path="/editing" element={<Guarded module="editing"><EditingPage /></Guarded>} />
         <Route path="/design" element={<Guarded module="design"><DesignPage /></Guarded>} />
         <Route path="/marketing" element={<Guarded module="marketing"><MarketingPage /></Guarded>} />
@@ -114,8 +138,12 @@ function AuthenticatedApp() {
         <Route path="/procurement" element={<Guarded module="procurement"><ProcurementPage /></Guarded>} />
         <Route path="/assets" element={<Guarded module="assets"><AssetsPage /></Guarded>} />
 
-        <Route path="/hr" element={<Guarded module="hr"><HrPage /></Guarded>} />
-        <Route path="/hr/*" element={<Guarded module="hr"><HrPage /></Guarded>} />
+        <Route path="/hr" element={<Guarded module="hr"><HrPage defaultTab="employees" /></Guarded>} />
+        <Route path="/hr/employees" element={<Guarded module="hr"><HrPage defaultTab="employees" /></Guarded>} />
+        <Route path="/hr/attendance" element={<Guarded module="hr"><HrPage defaultTab="attendance" /></Guarded>} />
+        <Route path="/hr/leaves" element={<Guarded module="hr"><HrPage defaultTab="leaves" /></Guarded>} />
+        <Route path="/hr/payroll" element={<Guarded module="hr"><HrPage defaultTab="payroll" /></Guarded>} />
+        <Route path="/hr/*" element={<Guarded module="hr"><HrPage defaultTab="employees" /></Guarded>} />
 
         <Route path="/support" element={<Guarded module="support"><SupportPage /></Guarded>} />
         <Route path="/files" element={<Guarded module="files"><FilesPage /></Guarded>} />

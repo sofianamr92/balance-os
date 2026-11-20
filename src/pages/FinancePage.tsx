@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeftRight,
   Lock,
@@ -46,6 +46,9 @@ export function FinancePage({ defaultTab = 'overview' }: { defaultTab?: 'overvie
   } = useOS();
 
   const [tab, setTab] = useState(defaultTab);
+  useEffect(() => {
+    setTab(defaultTab);
+  }, [defaultTab]);
   const includeDemo = isDemoMode || includeDemoInLiveReports;
 
   const trialBalance = useMemo(
