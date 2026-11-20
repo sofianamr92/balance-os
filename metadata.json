@@ -1,0 +1,6 @@
+{
+  "name": "BALANCE OS — Enterprise Agency Operating System",
+  "description": "Integrated enterprise operating system for BALANCE Agency covering CRM, Projects, Creative Production, Double-Entry Finance, HR, Automation, and Gemini AI Intelligence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,3349 @@
+# MASTER BUILD PROMPT — BALANCE OS
+## Complete Enterprise Operating System | Product, Architecture, Design & Engineering Specification
+### Version 1.0 — November 2026
+
+---
+
+# PART 01 — ROLE, MISSION & PROJECT IDENTITY
+
+أنت الآن تعمل كفريق متخصص متكامل يتكون من:
+
+1. Enterprise Software Architect.
+2. Chief Technology Officer (CTO).
+3. Senior Full-Stack Engineer.
+4. Database Architect.
+5. UI/UX Product Designer.
+6. ERP & CRM Business Analyst.
+7. Financial Systems Architect.
+8. Cybersecurity Engineer.
+9. AI & Automation Architect.
+10. Quality Assurance Engineer.
+
+أريد منك تصميم وبناء نظام برمجي احترافي متكامل باسم:
+
+**BALANCE OS**
+
+وهو نظام تشغيل وإدارة داخلي لشركة Balance Agency.
+
+لا أريد مجرد CRM تقليدي، ولا Dashboard شكلي، ولا مجموعة صفحات غير مترابطة.
+
+أريد Enterprise Business Operating System قادرًا على إدارة دورة عمل الشركة بأكملها، بدءًا من الحصول على عميل جديد، مرورًا بالمبيعات والتعاقد والتخطيط والإنتاج والتسليم، وانتهاءً بالمحاسبة والتحصيل وحساب ربحية المشروعات وتقييم أداء الفريق.
+
+يجب أن تكون جميع أجزاء النظام مترابطة على مستوى البيانات والعمليات والصلاحيات.
+
+## الهدف الرئيسي
+
+إنشاء مصدر مركزي واحد لإدارة جميع أعمال الشركة، بحيث يستطيع المؤسس والإدارة معرفة:
+
+- ماذا يحدث داخل الشركة الآن؟
+- من يعمل على كل مشروع؟
+- ما المهام المنجزة والمتأخرة؟
+- ما حالة كل عميل وصفقة؟
+- ما الإيرادات والمصروفات؟
+- كم تبلغ تكلفة كل مشروع؟
+- ما ربحية كل خدمة؟
+- ما أداء كل إدارة وموظف؟
+- أين توجد الاختناقات التشغيلية؟
+- ما الالتزامات والمستحقات القادمة؟
+- ما القرارات التي تحتاج تدخل الإدارة؟
+
+يجب أن يكون النظام قابلًا للتوسع، مع الحفاظ على البساطة وسهولة الاستخدام.
+
+---
+
+# PART 02 — OFFICIAL BUSINESS PROFILE & FIXED DECISIONS
+
+هذه المعلومات هي الأساس الرسمي للتصميم. لا تغيرها دون سبب تقني أو تشغيلي واضح.
+
+## 2.1 Company Profile
+
+Company Name: BALANCE Agency
+
+Product Name: BALANCE OS
+
+Business Type: Digital Agency / Creative & Technology Services.
+
+Business Activities:
+
+- Media Production.
+- Video Editing.
+- Photography.
+- Graphic Design.
+- Digital Marketing.
+- Social Media Management.
+- Software Development.
+- Website Development.
+- System Development.
+- Customer Services.
+
+Primary Market: Egypt.
+
+Primary Currency: EGP — Egyptian Pound.
+
+Primary Language: Arabic.
+
+Secondary Language: English.
+
+Default Interface Direction: RTL.
+
+Timezone: Africa/Cairo.
+
+Date Format: DD/MM/YYYY for Arabic interface.
+
+Number Format: Egyptian locale.
+
+## 2.2 Approved Business Decisions
+
+اعتمد القرارات التالية:
+
+| Decision | Approved Value |
+|---|---|
+| System Scope | Balance Agency فقط |
+| Users | Internal employees and authorized contractors |
+| Work Model | Hybrid |
+| Finance | Integrated Accounting & ERP Finance |
+| Branches | Multi-branch support |
+| Management | Central management with branch managers |
+| CRM | Custom CRM tailored to Balance |
+| Project Structure | Separate project per client and contracted service |
+| Approvals | Separation between requester and approver for sensitive operations |
+| Performance | Output, quality and deadline-based |
+| Primary Currency | EGP |
+| AI | Gemini-powered business assistant |
+| Automation | Workflow and notification automation |
+| Mobile | Mobile-first employee experience + PWA |
+| Client Portal | Not included in initial scope |
+| General SaaS | Not a public multi-company SaaS product |
+
+A single client may have multiple contracted services and therefore multiple service projects. Recurring monthly delivery should be represented through recurring work orders or project cycles under the relevant service project.
+
+A centralized company structure must support multiple branches without duplicating customer records or employee accounts.
+
+---
+
+# PART 03 — PRODUCT DESIGN PRINCIPLES
+
+The system must follow these principles:
+
+### 3.1 Single Source of Truth
+
+Every major entity must have one authoritative record.
+
+Examples:
+
+- One customer record.
+- One employee profile.
+- One project record.
+- One contract record.
+- One financial transaction record.
+
+Departments must use the same underlying records rather than creating separate copies.
+
+### 3.2 Workflow-Based Architecture
+
+The system must understand how work moves between departments.
+
+Examples:
+
+Sales → Contract → Project → Production → Review → Delivery → Finance.
+
+### 3.3 Role-Based Experience
+
+Different users must see different dashboards, navigation items, records and available actions according to their permissions.
+
+### 3.4 Data Integrity
+
+Do not allow operations that create inconsistent records, duplicate financial entries, broken relationships or unauthorized access.
+
+### 3.5 Real Functionality
+
+Every button, filter, form, table, page, menu item and action must work.
+
+Do not create decorative buttons that do nothing.
+
+Do not use static fake numbers as actual company metrics.
+
+### 3.6 Maintainability
+
+Separate the application into logical modules with clear responsibilities.
+
+Do not put the entire application into one oversized component or one backend file.
+
+### 3.7 Scalability
+
+Design the foundation for future expansion to more branches, larger teams, more projects and more operational complexity.
+
+---
+
+# PART 04 — TECHNICAL ARCHITECTURE
+
+Build a modern full-stack web application compatible with Google AI Studio Build mode.
+
+Inspect the existing environment before generating the architecture. Use the supported capabilities of the current environment instead of assuming unavailable integrations.
+
+## 4.1 Frontend Architecture
+
+Preferred technology:
+
+- React.
+- TypeScript.
+- Modern CSS and Tailwind CSS.
+- React Router or an equivalent routing solution.
+- TanStack Query or an equivalent server-state manager.
+- React Hook Form.
+- Zod validation.
+- Recharts for analytical visualization.
+- Lucide icons.
+- Accessible component primitives.
+- Reusable enterprise UI components.
+
+Use the current stable versions compatible with the environment.
+
+Frontend responsibilities:
+
+1. Rendering the interface.
+2. Handling navigation.
+3. Form interactions.
+4. Input validation.
+5. Displaying application state.
+6. Managing loading and error states.
+7. Calling authenticated backend APIs.
+8. Rendering charts and reports.
+9. Providing responsive desktop, tablet and mobile layouts.
+
+Do not put sensitive business logic in the browser.
+
+Do not connect the browser directly to unrestricted database credentials.
+
+## 4.2 Backend Architecture
+
+Preferred technology:
+
+- Node.js.
+- TypeScript.
+- REST API.
+- Modular service-oriented structure.
+- Server-side validation.
+- Authentication middleware.
+- Authorization middleware.
+- Centralized error handling.
+- Structured logging.
+- Background job processing.
+- Database transaction management.
+
+The backend must be divided into business modules:
+
+- Auth Module.
+- User Module.
+- Organization Module.
+- Branch Module.
+- CRM Module.
+- Sales Module.
+- Contract Module.
+- Project Module.
+- Task Module.
+- Production Module.
+- Editing Module.
+- Design Module.
+- Marketing Module.
+- Development Module.
+- Finance Module.
+- Accounting Module.
+- Procurement Module.
+- Asset Module.
+- HR Module.
+- Support Module.
+- File Module.
+- Notification Module.
+- Automation Module.
+- AI Module.
+- Reporting Module.
+- Audit Module.
+
+Each module must have a clear service boundary.
+
+The backend must control access, validate requests and execute all sensitive business operations.
+
+## 4.3 Database Architecture
+
+Primary Database: PostgreSQL.
+
+Database Access Layer: Prisma ORM.
+
+Use:
+
+- Normalized relational data.
+- Explicit foreign-key relationships.
+- Database transactions.
+- Unique constraints.
+- Indexes.
+- Migrations.
+- Referential integrity.
+- Proper numeric types for monetary values.
+- UTC timestamps internally.
+- Local timezone conversion in the interface.
+
+Do not use browser localStorage as the main database.
+
+Do not use mock arrays as permanent data storage.
+
+Do not use Firestore as the primary accounting and ERP database unless a documented technical constraint makes PostgreSQL unavailable. Firebase Authentication may be used independently of the relational database.
+
+If PostgreSQL provisioning is unavailable in the current environment:
+
+1. Explain the exact limitation.
+2. Keep the data access layer abstracted.
+3. Create the relational schema and migration plan.
+4. Build a clearly identified development adapter only when necessary.
+5. Never claim that persistent production storage has been configured if it has not.
+
+## 4.4 Authentication
+
+Use a secure authentication system.
+
+Preferred authentication options:
+
+- Firebase Authentication with server-side ID token verification.
+- Secure session-based authentication if the environment supports it.
+
+Requirements:
+
+- No public self-registration.
+- Invite-based account creation.
+- Secure login.
+- Password reset.
+- Session expiration.
+- Logout from current device.
+- Administrative session revocation.
+- Optional MFA for privileged accounts.
+- Failed-login monitoring.
+- Account activation and deactivation.
+- Device/session management.
+
+No default publicly accessible administrator credentials.
+
+## 4.5 File Storage
+
+Use secure object storage for:
+
+- Images.
+- Videos.
+- Raw footage.
+- Exported videos.
+- Design files.
+- Contracts.
+- Invoices.
+- Employee documents.
+- Project attachments.
+
+Store metadata in PostgreSQL, including:
+
+- File ID.
+- File name.
+- File type.
+- MIME type.
+- File size.
+- Storage path.
+- Owner.
+- Project ID.
+- Task ID.
+- Uploaded by.
+- Upload date.
+- Version.
+- Security classification.
+
+Do not store large video files directly in relational database fields.
+
+Use authenticated download access or short-lived signed links.
+
+---
+
+# PART 05 — BRAND IDENTITY & DESIGN SYSTEM
+
+Create a distinctive enterprise design system for BALANCE OS.
+
+The design should communicate:
+
+- Professionalism.
+- Organization.
+- Reliability.
+- Technology.
+- Control.
+- Clarity.
+- Efficiency.
+
+Avoid generic AI-generated dashboard aesthetics.
+
+Avoid excessive gradients, unnecessary glassmorphism, oversized cards and decorative effects that reduce information density.
+
+## 5.1 Color Palette
+
+Use the following primary palette:
+
+| Token | Color | Usage |
+|---|---|---|
+| Primary | #172B4D | Main brand navy |
+| Primary Dark | #101828 | Sidebar and strong surfaces |
+| Primary Blue | #2563EB | Primary buttons and links |
+| Secondary Blue | #3B82F6 | Secondary actions |
+| Accent Cyan | #38BDF8 | Selected details and highlights |
+| Background | #F7F9FC | Main light background |
+| Surface | #FFFFFF | Cards and panels |
+| Surface Muted | #EEF2F6 | Secondary sections |
+| Border | #E4E7EC | Dividers and borders |
+| Text Primary | #101828 | Main text |
+| Text Secondary | #667085 | Secondary text |
+| Success | #16A34A | Success states |
+| Warning | #D97706 | Warning states |
+| Danger | #DC2626 | Errors and overdue items |
+| Info | #0284C7 | Information |
+
+Use colors consistently through design tokens rather than hardcoding random values throughout components.
+
+## 5.2 Dark Mode
+
+Provide a complete dark theme.
+
+Suggested dark palette:
+
+| Token | Color |
+|---|---|
+| Background | #0B1220 |
+| Surface | #111827 |
+| Surface Elevated | #182235 |
+| Border | #293548 |
+| Primary | #60A5FA |
+| Accent | #38BDF8 |
+| Text Primary | #F9FAFB |
+| Text Secondary | #9CA3AF |
+
+Dark mode must preserve contrast, visual hierarchy and accessibility.
+
+The default appearance should be light mode with a navy sidebar and clean white workspace.
+
+Allow users to switch appearance from their preferences.
+
+## 5.3 Typography
+
+Use professional Arabic and Latin fonts.
+
+Preferred Arabic font: IBM Plex Sans Arabic or Cairo.
+
+Preferred English font: Inter.
+
+Use consistent typography levels:
+
+- Main page title: 24–30px.
+- Section title: 18–22px.
+- Card title: 15–17px.
+- Body: 14–15px.
+- Secondary information: 12–13px.
+
+Avoid excessively small text.
+
+Ensure Arabic numerals, currencies and mixed Arabic-English labels render correctly.
+
+## 5.4 Iconography
+
+Use one consistent icon family.
+
+Prefer Lucide icons.
+
+Do not mix unrelated icon styles.
+
+Use clear icon labels for navigation actions.
+
+Do not use emoji as primary enterprise interface icons.
+
+## 5.5 Interface Layout
+
+Desktop layout:
+
+- Sidebar approximately 250–270px.
+- Main content area flexible.
+- Top navigation bar approximately 64–72px.
+- Consistent content spacing.
+- Maximum readable content width where appropriate.
+
+Sidebar:
+
+- Balance logo.
+- Module navigation.
+- Collapsible groups.
+- Active state.
+- Role-based visibility.
+- Collapse/expand action.
+
+Top Bar:
+
+- Global search.
+- Current branch selector, when permitted.
+- Notifications.
+- Quick Create menu.
+- Help.
+- Theme selector.
+- User profile.
+
+Main Content:
+
+- Breadcrumbs.
+- Page title.
+- Page description.
+- Primary action.
+- Filters.
+- Data visualization.
+- Tables or cards.
+
+## 5.6 UI Behavior
+
+Use:
+
+- Smooth but subtle animations.
+- Clear hover and focus states.
+- Skeleton loading.
+- Empty states.
+- Confirmation dialogs.
+- Toast notifications.
+- Form validation messages.
+- Pagination.
+- Sorting.
+- Filtering.
+- Search.
+- Responsive tables.
+- Accessible keyboard interaction.
+
+Never show an empty page without explaining what it represents or what the user can do next.
+
+---
+
+# PART 06 — APPLICATION NAVIGATION
+
+Build the following main navigation structure.
+
+1. Dashboard.
+2. My Workspace.
+3. Company Management.
+4. CRM & Sales.
+5. Clients.
+6. Proposals & Contracts.
+7. Projects.
+8. Tasks.
+9. Calendar.
+10. Production.
+11. Video Editing.
+12. Graphic Design.
+13. Marketing.
+14. Development.
+15. Finance & Accounting.
+16. Procurement.
+17. Assets & Equipment.
+18. Human Resources.
+19. Customer Support.
+20. File Library.
+21. Knowledge Base.
+22. Reports & Analytics.
+23. AI Assistant.
+24. Automation Center.
+25. Settings.
+
+Each item must map to a real route and a meaningful functional module.
+
+Navigation visibility must be determined by permissions.
+
+Suggested route structure:
+
+/dashboard
+
+/workspace
+
+/company
+
+/company/branches
+
+/company/departments
+
+/company/teams
+
+/crm
+
+/crm/leads
+
+/crm/contacts
+
+/crm/clients
+
+/crm/deals
+
+/crm/proposals
+
+/sales/contracts
+
+/projects
+
+/projects/:projectId
+
+/tasks
+
+/calendar
+
+/production
+
+/editing
+
+/design
+
+/marketing
+
+/development
+
+/finance
+
+/finance/accounts
+
+/finance/journals
+
+/finance/invoices
+
+/finance/payments
+
+/finance/expenses
+
+/finance/treasury
+
+/procurement
+
+/assets
+
+/hr
+
+/hr/employees
+
+/hr/attendance
+
+/hr/leaves
+
+/hr/payroll
+
+/support
+
+/files
+
+/knowledge
+
+/reports
+
+/ai
+
+/automation
+
+/settings
+
+Use consistent routes and protect all private routes.
+
+---
+
+# PART 07 — ORGANIZATION MANAGEMENT
+
+Build a complete organizational structure.
+
+## 7.1 Company
+
+Company fields:
+
+- Company ID.
+- Company name.
+- Logo.
+- Legal name.
+- Tax information.
+- Address.
+- Contact information.
+- Primary currency.
+- Fiscal year settings.
+- Default timezone.
+- Company status.
+
+## 7.2 Branches
+
+Each branch must have:
+
+- Branch ID.
+- Branch code.
+- Branch name.
+- Address.
+- Manager.
+- Phone.
+- Email.
+- Status.
+- Operational budget.
+- Assigned departments.
+- Assigned employees.
+- Local cash accounts.
+- Related projects.
+
+Support:
+
+- Central headquarters.
+- Multiple operating branches.
+- Central management.
+- Branch-level permissions.
+- Branch-specific reports.
+- Consolidated company reports.
+
+Default policy: centralized management with authorized branch managers.
+
+## 7.3 Departments
+
+Create these departments:
+
+01. General Management.
+
+02. Sales.
+
+03. Photography & Media Production.
+
+04. Video Editing.
+
+05. Graphic Design.
+
+06. Social Media Marketing.
+
+07. Development & Programming.
+
+08. Finance & Accounting.
+
+09. Human Resources.
+
+10. Customer Service.
+
+Departments must support:
+
+- Department manager.
+- Team leaders.
+- Members.
+- KPIs.
+- Budgets.
+- Tasks.
+- Reports.
+- Projects.
+- Department-specific permissions.
+
+## 7.4 Teams
+
+An employee can belong to multiple teams and departments.
+
+Do not duplicate employee accounts when assigning multiple roles.
+
+---
+
+# PART 08 — USERS, EMPLOYEES & RBAC
+
+Build a secure identity and authorization management system.
+
+## 8.1 Employee Profile
+
+Employee data:
+
+- Employee ID.
+- Full name.
+- Profile photo.
+- Work email.
+- Phone.
+- Position.
+- Department memberships.
+- Team memberships.
+- Branch memberships.
+- Manager.
+- Employment type.
+- Work model.
+- Contract information.
+- Joining date.
+- Employment status.
+- Emergency contact where appropriate.
+- Documents.
+- Assigned assets.
+- Skills.
+- Performance history.
+
+Protect personal and sensitive HR records.
+
+## 8.2 Role-Based Access Control
+
+Create roles:
+
+- CEO.
+- General Manager.
+- Branch Manager.
+- Department Manager.
+- Team Leader.
+- Project Manager.
+- Accountant.
+- HR Manager.
+- Sales Representative.
+- Photographer.
+- Video Editor.
+- Graphic Designer.
+- Marketing Specialist.
+- Developer.
+- Customer Support.
+- Freelancer.
+
+These are starting roles, not fixed limits. Administrators must be able to create custom roles.
+
+## 8.3 Permissions
+
+Permission actions:
+
+- View.
+- Create.
+- Edit.
+- Delete.
+- Approve.
+- Reject.
+- Assign.
+- Export.
+- Download.
+- Manage.
+
+Permissions must be assignable by:
+
+- Module.
+- Resource.
+- Action.
+- Branch scope.
+- Department scope.
+- Assigned records.
+- Own records.
+- Organizational hierarchy.
+
+Examples:
+
+A video editor can view assigned projects and edit assigned tasks but cannot view company payroll.
+
+A branch manager can view their branch's financial and operational summaries but cannot automatically access confidential HR records from other branches.
+
+An accountant can access authorized financial information without accessing restricted personal HR records unnecessarily.
+
+## 8.4 Separation of Duties
+
+For sensitive operations:
+
+- Requester and approver must be different people.
+- Record the identity of the requester.
+- Record the identity of the approver.
+- Save approval date.
+- Save approval comments.
+- Keep a permanent audit trail.
+
+The system must prevent unauthorized users from approving their own financial requests.
+
+---
+
+# PART 09 — CRM & SALES MANAGEMENT
+
+Build a fully customized CRM for Balance.
+
+## 9.1 Lead Management
+
+Lead fields:
+
+- Lead ID.
+- Business name.
+- Contact name.
+- Phone.
+- Email.
+- Industry.
+- Location.
+- Source.
+- Interested services.
+- Estimated budget.
+- Assigned salesperson.
+- Priority.
+- Status.
+- Last contact.
+- Next follow-up.
+- Notes.
+- Lost reason.
+
+Lead sources:
+
+- Facebook.
+- Instagram.
+- TikTok.
+- Website.
+- WhatsApp.
+- Google Maps.
+- Referrals.
+- Direct outreach.
+- Events.
+- Other.
+
+Prevent duplicate leads using phone, email and business identity checks.
+
+## 9.2 Sales Pipeline
+
+Stages:
+
+1. New Lead.
+2. Qualified.
+3. Contacted.
+4. Meeting Scheduled.
+5. Meeting Completed.
+6. Proposal Sent.
+7. Negotiation.
+8. Won.
+9. Lost.
+
+Allow administrators to configure stages while preserving the important business rules.
+
+## 9.3 Sales Activities
+
+Support:
+
+- Calls.
+- Meetings.
+- WhatsApp follow-ups.
+- Emails.
+- Notes.
+- Tasks.
+- Reminders.
+- Contact history.
+
+## 9.4 Deals
+
+Deal fields:
+
+- Deal ID.
+- Client.
+- Lead.
+- Salesperson.
+- Services.
+- Estimated value.
+- Proposed value.
+- Expected close date.
+- Probability.
+- Stage.
+- Branch.
+- Notes.
+
+## 9.5 Proposals
+
+Proposal features:
+
+- Create proposal.
+- Add services.
+- Add descriptions.
+- Quantities.
+- Unit prices.
+- Discounts.
+- Taxes when applicable.
+- Payment terms.
+- Validity date.
+- Scope of work.
+- Deliverables.
+- Internal approval.
+- PDF export.
+- Version history.
+
+## 9.6 Contracts
+
+Contract features:
+
+- Contract ID.
+- Related client.
+- Related deal.
+- Contract value.
+- Service list.
+- Duration.
+- Start and end dates.
+- Payment schedule.
+- Deliverables.
+- Revision policy.
+- Branch.
+- Assigned account manager.
+- Attachments.
+- Signature status.
+- Renewal status.
+
+Do not consider a proposal approved merely because an employee changed its status manually.
+
+Track contract approval and signature evidence.
+
+## 9.7 Sales Analytics
+
+Display:
+
+- Leads by source.
+- Leads by salesperson.
+- Conversion rate.
+- Deal value.
+- Lost deal reasons.
+- Average sales cycle.
+- Monthly revenue contracted.
+- Sales forecasts.
+- Follow-up compliance.
+
+---
+
+# PART 10 — SERVICE CATALOG
+
+Build a central Service Catalog.
+
+Services:
+
+- Photography.
+- Videography.
+- Video Editing.
+- Graphic Design.
+- Social Media Management.
+- Digital Marketing.
+- Advertising Campaign Management.
+- Website Development.
+- Software Development.
+- Custom Systems.
+- Other custom services.
+
+Each service requires:
+
+- Service ID.
+- Name.
+- Description.
+- Category.
+- Pricing model.
+- Default rate.
+- Estimated cost.
+- Responsible departments.
+- Deliverables.
+- Workflow template.
+- Default tasks.
+- Estimated duration.
+- Revision rules.
+- Approval requirements.
+- Status.
+
+Support pricing by:
+
+- Fixed price.
+- Hourly or daily rate when applicable.
+- Monthly subscription.
+- Per deliverable.
+- Custom quote.
+
+Allow custom service packages.
+
+The Service Catalog must be connected to CRM, Proposals, Contracts, Projects and Finance.
+
+---
+
+# PART 11 — PROJECT MANAGEMENT
+
+Every accepted contracted service must have a traceable execution record.
+
+## 11.1 Project Structure
+
+Project fields:
+
+- Project ID.
+- Project name.
+- Client.
+- Contract.
+- Contracted service.
+- Branch.
+- Project manager.
+- Responsible department.
+- Start date.
+- Due date.
+- Budget.
+- Approved revenue.
+- Estimated costs.
+- Actual costs.
+- Priority.
+- Status.
+- Milestones.
+- Deliverables.
+- Documents.
+- Notes.
+
+A client can have multiple service projects.
+
+A monthly service project can have recurring monthly work orders or cycles.
+
+## 11.2 Project Views
+
+Provide:
+
+- Overview.
+- Table.
+- Kanban.
+- Timeline.
+- Calendar.
+- Workload.
+- Financial overview.
+- Milestones.
+- Activity log.
+
+## 11.3 Project Statuses
+
+- Draft.
+- Planning.
+- Ready.
+- Active.
+- On Hold.
+- At Risk.
+- Under Review.
+- Completed.
+- Cancelled.
+
+## 11.4 Project Budget
+
+Compare:
+
+- Contract revenue.
+- Estimated costs.
+- Actual costs.
+- Direct labor cost when measurable.
+- Equipment costs.
+- Production expenses.
+- External service costs.
+- Other direct costs.
+- Project contribution margin.
+
+Do not confuse contribution margin with final company net profit.
+
+---
+
+# PART 12 — TASK MANAGEMENT
+
+Create a unified task system shared across departments.
+
+## 12.1 Task Fields
+
+- Task ID.
+- Title.
+- Description.
+- Project.
+- Client.
+- Service.
+- Department.
+- Assigned employee.
+- Reviewer.
+- Priority.
+- Start date.
+- Due date.
+- Estimated duration.
+- Actual duration.
+- Status.
+- Checklist.
+- Dependencies.
+- Attachments.
+- Comments.
+- Revision requests.
+- Activity history.
+
+## 12.2 Task Statuses
+
+- Backlog.
+- Ready.
+- Assigned.
+- In Progress.
+- On Hold.
+- Internal Review.
+- Client Approval.
+- Revision.
+- Approved.
+- Completed.
+- Cancelled.
+
+Not every task must use every state.
+
+Allow configuration by task type.
+
+## 12.3 Task Views
+
+- My Tasks.
+- Team Tasks.
+- Department Tasks.
+- Overdue.
+- Upcoming.
+- Waiting for Review.
+- Calendar.
+- Kanban.
+- List.
+
+## 12.4 Revision Management
+
+Every revision request must contain:
+
+- Revision ID.
+- Related task.
+- Requester.
+- Reason.
+- Description.
+- Date.
+- Assigned employee.
+- Due date.
+- Resulting version.
+- Approval outcome.
+
+Distinguish between in-scope revisions and contractual scope changes requiring commercial approval.
+
+## 12.5 Workload Management
+
+Show:
+
+- Open tasks per employee.
+- Overdue tasks.
+- Upcoming deadlines.
+- Estimated workload.
+- Current assignments.
+- Workload distribution per team.
+
+Do not automatically interpret more tasks as better performance.
+
+---
+
+# PART 13 — MEDIA PRODUCTION MANAGEMENT
+
+Build a dedicated media production module.
+
+## 13.1 Shoot Management
+
+Features:
+
+- Shoot calendar.
+- Shoot requests.
+- Location details.
+- Call sheets.
+- Shoot objectives.
+- Shot lists.
+- Crew assignments.
+- Equipment reservations.
+- Schedule.
+- Actual shooting date.
+- Production notes.
+- Production expenses.
+- Raw footage handover.
+
+## 13.2 Equipment Scheduling
+
+Allow users to reserve:
+
+- Cameras.
+- Lenses.
+- Lighting equipment.
+- Microphones.
+- Stabilizers.
+- Tripods.
+- Batteries.
+- Memory cards.
+- Accessories.
+
+Check availability before confirming a reservation.
+
+Prevent double-booking unless explicitly authorized.
+
+## 13.3 Production Workflow
+
+Requested → Planned → Scheduled → Ready → In Production → Footage Uploaded → Handover Completed.
+
+## 13.4 Media Library
+
+Store metadata for:
+
+- Original footage.
+- Audio files.
+- Project files.
+- Reference images.
+- Final exports.
+
+Use secure object storage for actual media assets.
+
+Do not use the relational database as a replacement for proper video-file storage.
+
+---
+
+# PART 14 — VIDEO EDITING MANAGEMENT
+
+Build a production pipeline specifically for editing operations.
+
+## 14.1 Editing Dashboard
+
+Show:
+
+- New editing requests.
+- Unassigned work.
+- Assigned jobs.
+- In-progress edits.
+- Internal review.
+- Revisions.
+- Pending approvals.
+- Final exports.
+
+## 14.2 Editing Task Fields
+
+- Video title.
+- Project.
+- Client.
+- Editor.
+- Reviewer.
+- Footage location.
+- Project files.
+- Reference videos.
+- Video duration.
+- Aspect ratio.
+- Resolution.
+- Frame rate.
+- Language.
+- Captions.
+- Graphics requirements.
+- Delivery format.
+- Deadline.
+- Revision count.
+
+## 14.3 Editing Workflow
+
+Incoming Footage → Assigned → Editing → Internal Review → Revision if required → Approved → Final Export → Delivery.
+
+## 14.4 Export Management
+
+Track:
+
+- Export name.
+- Export version.
+- Resolution.
+- Aspect ratio.
+- Frame rate.
+- Codec.
+- Format.
+- File size.
+- Export date.
+- Exported by.
+
+---
+
+# PART 15 — GRAPHIC DESIGN MANAGEMENT
+
+Create a structured design workflow.
+
+Features:
+
+- Design requests.
+- Client brand profiles.
+- Brand guidelines.
+- Design references.
+- Design assignment.
+- Required sizes.
+- Format requirements.
+- Deadline.
+- Internal review.
+- Revision tracking.
+- Version history.
+- Final exports.
+- Asset library.
+
+Support:
+
+- Social media posts.
+- Stories.
+- Ad creatives.
+- Thumbnails.
+- Posters.
+- Brand identity.
+- Presentation graphics.
+- Print designs.
+
+A design job may contain several required output dimensions and formats.
+
+Track each requested deliverable independently.
+
+---
+
+# PART 16 — MARKETING MANAGEMENT
+
+Create a full marketing operations module.
+
+## 16.1 Marketing Strategy
+
+Per client:
+
+- Marketing objectives.
+- Audience.
+- Positioning.
+- Competitor notes.
+- Marketing channels.
+- KPIs.
+- Campaign strategy.
+- Budget.
+- Time period.
+
+## 16.2 Content Management
+
+Fields:
+
+- Content ID.
+- Client.
+- Project.
+- Topic.
+- Content pillar.
+- Format.
+- Platform.
+- Caption.
+- Script.
+- Visual reference.
+- Assigned creator.
+- Production status.
+- Publication date.
+- Approval status.
+
+## 16.3 Content Calendar
+
+Views:
+
+- Monthly.
+- Weekly.
+- Daily.
+- By platform.
+- By client.
+- By status.
+
+## 16.4 Campaign Management
+
+Store:
+
+- Campaign name.
+- Objective.
+- Channel.
+- Audience.
+- Start/end.
+- Budget.
+- Actual spending.
+- Results.
+- Related creative assets.
+- KPI performance.
+
+Do not automatically assume advertising-platform integrations exist. Add integrations only after credentials and APIs are configured.
+
+## 16.5 Marketing Reports
+
+Track metrics such as:
+
+- Reach.
+- Impressions.
+- Engagement.
+- Clicks.
+- Leads.
+- Conversions.
+- Cost per result.
+- Spend.
+- Return on ad spend when reliable revenue attribution exists.
+
+Show data source and reporting period.
+
+---
+
+# PART 17 — DEVELOPMENT MANAGEMENT
+
+Build a software development management module.
+
+Include:
+
+- Development projects.
+- Product requirements.
+- Feature requests.
+- Backlog.
+- Sprint planning.
+- Task assignment.
+- Bug reports.
+- Severity.
+- QA testing.
+- Code review tracking.
+- Release notes.
+- Deployment records.
+- Maintenance requests.
+
+Statuses:
+
+- Submitted.
+- Evaluating.
+- Approved.
+- Backlog.
+- In Development.
+- Code Review.
+- QA.
+- Ready for Release.
+- Released.
+- Closed.
+
+Differentiate business requirements from implementation tasks and software defects.
+
+---
+
+# PART 18 — CUSTOMER SERVICE
+
+Build internal ticket management.
+
+Ticket fields:
+
+- Ticket ID.
+- Client.
+- Related project.
+- Category.
+- Priority.
+- Source.
+- Assigned employee.
+- Created date.
+- Due date.
+- Description.
+- Attachments.
+- Conversation history.
+- Resolution.
+- Satisfaction score.
+
+Statuses:
+
+- New.
+- Assigned.
+- In Progress.
+- Waiting for Internal Department.
+- Waiting for Customer Information.
+- Resolved.
+- Closed.
+
+Ticket assignment must integrate with the responsible department.
+
+---
+
+# PART 19 — FINANCIAL & ACCOUNTING SYSTEM
+
+This is a core module and must be designed with strong accounting integrity.
+
+Do not build finance as a simple income/expense tracker.
+
+Build an integrated accounting system based on double-entry bookkeeping.
+
+## 19.1 Accounting Foundation
+
+Modules:
+
+1. Chart of Accounts.
+2. General Ledger.
+3. Journal Entries.
+4. Journal Entry Lines.
+5. Fiscal Periods.
+6. Trial Balance.
+7. Profit & Loss.
+8. Balance Sheet.
+9. Cash Flow.
+10. Cost Centers.
+11. Budgets.
+
+## 19.2 Chart of Accounts
+
+Support configurable account categories:
+
+- Assets.
+- Liabilities.
+- Equity.
+- Revenue.
+- Direct Costs.
+- Operating Expenses.
+
+Each account:
+
+- Account ID.
+- Account code.
+- Account name.
+- Account type.
+- Parent account.
+- Branch applicability.
+- Cost center.
+- Status.
+
+Do not hardcode an arbitrary final Egyptian chart of accounts.
+
+Provide a configurable starter structure that can be reviewed and approved by a qualified accountant.
+
+## 19.3 Journal Entries
+
+Each journal entry must contain:
+
+- Entry ID.
+- Entry number.
+- Date.
+- Description.
+- Reference type.
+- Reference ID.
+- Created by.
+- Approved by where applicable.
+- Status.
+- Currency.
+- Debit lines.
+- Credit lines.
+
+Enforce:
+
+Total Debits = Total Credits.
+
+Posted journal entries must be immutable.
+
+Correct mistakes through controlled reversal or adjustment entries, never by silently modifying posted financial history.
+
+## 19.4 Accounts Receivable
+
+Features:
+
+- Customer invoices.
+- Invoice lines.
+- Payment schedules.
+- Partial payments.
+- Payment allocations.
+- Customer statements.
+- Outstanding balances.
+- Overdue invoices.
+- Credit notes.
+
+## 19.5 Accounts Payable
+
+Features:
+
+- Suppliers.
+- Purchase bills.
+- Supplier invoices.
+- Payment schedules.
+- Partial payments.
+- Supplier statements.
+- Outstanding balances.
+
+## 19.6 Treasury & Banks
+
+Features:
+
+- Branch cash accounts.
+- Main treasury.
+- Petty cash.
+- Bank accounts.
+- Cash receipts.
+- Cash disbursements.
+- Transfers.
+- Bank reconciliation.
+- Treasury statements.
+
+Transfers must be represented correctly and not counted as new company revenue or expenses.
+
+## 19.7 Expenses
+
+Expense data:
+
+- Expense ID.
+- Employee.
+- Branch.
+- Department.
+- Project.
+- Cost center.
+- Category.
+- Amount.
+- Date.
+- Payment method.
+- Receipt attachment.
+- Description.
+- Approval status.
+- Approver.
+- Accounting reference.
+
+Workflow:
+
+Submitted → Manager Review → Finance Review → Approved → Posted → Paid.
+
+## 19.8 Procurement
+
+Purchase workflow:
+
+Purchase Request → Approval → Supplier Quotes → Purchase Order → Receiving → Supplier Bill → Payment.
+
+Track:
+
+- Suppliers.
+- Purchase requests.
+- Purchase orders.
+- Receiving.
+- Vendor invoices.
+- Payments.
+
+## 19.9 Payroll
+
+Support:
+
+- Employee salary structure.
+- Allowances.
+- Deductions.
+- Bonuses.
+- Advances.
+- Approved attendance inputs.
+- Payroll periods.
+- Payroll statements.
+- Approval.
+- Payment records.
+- Accounting postings.
+
+Payroll access must be highly restricted.
+
+## 19.10 Fixed Assets
+
+Support:
+
+- Asset register.
+- Purchase date.
+- Acquisition cost.
+- Location.
+- Branch.
+- Assigned employee.
+- Depreciation policy.
+- Maintenance.
+- Asset transfers.
+- Disposal.
+
+Separate fixed assets from consumable inventory.
+
+## 19.11 Cost Accounting
+
+Use:
+
+- Branch cost centers.
+- Department cost centers.
+- Project cost centers.
+- Service cost centers.
+
+Calculate:
+
+Project Contribution Margin = Recognized Project Revenue − Direct Project Costs.
+
+Do not label this as company net profit.
+
+Create reliable links between operational transactions and accounting records.
+
+## 19.12 Financial Controls
+
+- Approval limits.
+- Separation of duties.
+- Immutable posted entries.
+- Audit log.
+- Attachment requirements.
+- Fiscal period locks.
+- Reconciliation checks.
+- Duplicate payment prevention.
+- Transaction reference validation.
+
+Base currency: EGP.
+
+Support multi-currency as an extensible capability, but keep EGP as the initial reporting currency.
+
+Tax configuration and Egyptian electronic invoicing or tax integration must remain configurable and subject to qualified local accounting review. Do not fabricate tax compliance.
+
+---
+
+# PART 20 — HUMAN RESOURCE MANAGEMENT
+
+Build complete internal HR management.
+
+Modules:
+
+- Employees.
+- Recruitment.
+- Job Positions.
+- Departments.
+- Contracts.
+- Onboarding.
+- Attendance.
+- Remote Work.
+- Leaves.
+- Permissions.
+- Payroll Inputs.
+- Performance Reviews.
+- Training.
+- Offboarding.
+
+## 20.1 Hybrid Work
+
+Support:
+
+- Office work.
+- Remote work.
+- External assignments.
+- Approved leave.
+- Holidays.
+- Shift schedules.
+
+Do not equate online presence with productivity.
+
+Do not use continuous GPS tracking.
+
+If location-based attendance is enabled, require clear policy, explicit authorization and minimal data retention.
+
+## 20.2 Performance Management
+
+Use output-based evaluation.
+
+Performance dimensions:
+
+- Work quality.
+- On-time delivery.
+- Task completion.
+- Reliability.
+- Collaboration.
+- Role-specific results.
+- Supervisor assessment.
+- Employee self-review.
+
+Time tracking can exist as an optional planning tool but must not be the sole measure of performance.
+
+Avoid a simplistic leaderboard that encourages harmful competition.
+
+---
+
+# PART 21 — ASSET & EQUIPMENT MANAGEMENT
+
+Manage:
+
+- Cameras.
+- Lenses.
+- Lighting.
+- Audio devices.
+- Stabilizers.
+- Computers.
+- Monitors.
+- Furniture.
+- Accessories.
+- Storage equipment.
+
+Features:
+
+- Asset registration.
+- Asset categories.
+- Branch location.
+- Custodian.
+- Assignment.
+- Reservations.
+- Maintenance.
+- Damage reports.
+- Transfer between branches.
+- Return and inspection.
+- Asset history.
+
+Prevent conflicting equipment bookings.
+
+---
+
+# PART 22 — FILE MANAGEMENT & KNOWLEDGE BASE
+
+Build two distinct but connected systems.
+
+## 22.1 File Library
+
+Manage:
+
+- Company documents.
+- Contracts.
+- Client documents.
+- Project files.
+- Media.
+- Design assets.
+- Finance documents.
+- HR documents.
+
+Use folders, metadata, tags, versioning and role-based access.
+
+## 22.2 Knowledge Base
+
+Store:
+
+- Company policies.
+- SOPs.
+- Department manuals.
+- Training guides.
+- Templates.
+- Checklists.
+- Frequently asked questions.
+
+Provide search, categories, ownership, version history and revision dates.
+
+---
+
+# PART 23 — WORKFLOW AUTOMATION CENTER
+
+Build a visual workflow automation module.
+
+A workflow consists of:
+
+Trigger → Condition → Action → Result → Audit Log.
+
+## 23.1 Trigger Types
+
+- Record Created.
+- Record Updated.
+- Status Changed.
+- Deadline Reached.
+- Date Approaching.
+- Approval Granted.
+- Approval Rejected.
+- Payment Received.
+- Invoice Overdue.
+- Task Completed.
+- Employee Assigned.
+
+## 23.2 Action Types
+
+- Create Task.
+- Assign Employee.
+- Change Status.
+- Send Notification.
+- Create Follow-up.
+- Create Work Order.
+- Generate Draft.
+- Escalate to Manager.
+- Create Reminder.
+- Prepare Approval Request.
+
+## 23.3 Automation Examples
+
+1. New lead → assign salesperson.
+2. No follow-up → create reminder.
+3. Won deal → create contract preparation task.
+4. Contract approved → create project.
+5. Project created → load service workflow template.
+6. Shoot completed → notify editing department.
+7. Task overdue → notify responsible employee and manager.
+8. Deliverable approved → move it to final delivery.
+9. Invoice approaching due date → notify finance.
+10. Payment overdue → create collection follow-up.
+11. Project nearing deadline → notify project manager.
+12. Contract nearing renewal → notify sales team.
+13. Leave approved → update employee calendar.
+14. Equipment reservation approved → mark equipment unavailable for other conflicting reservations.
+
+## 23.4 Workflow Safety
+
+- Prevent duplicate execution.
+- Use idempotency for repeated events.
+- Log each run.
+- Retry recoverable failures.
+- Provide failure notifications.
+- Allow authorized manual execution.
+- Keep sensitive financial actions approval-gated.
+
+---
+
+# PART 24 — AI INTELLIGENCE CENTER
+
+Build an AI business assistant named:
+
+**BALANCE INTELLIGENCE**
+
+Integrate Gemini through secure backend calls.
+
+Never expose Gemini API keys in frontend code.
+
+## 24.1 AI Roles
+
+### CEO Assistant
+
+Can summarize:
+
+- Company performance.
+- Project status.
+- Sales pipeline.
+- Financial summaries.
+- Major operational risks.
+
+### Sales Assistant
+
+Can:
+
+- Analyze leads.
+- Summarize customer history.
+- Identify follow-up opportunities.
+- Analyze lost deals.
+- Suggest sales actions.
+
+### Project Assistant
+
+Can:
+
+- Summarize project progress.
+- Detect overdue work.
+- Identify dependency risks.
+- Suggest workload adjustments.
+
+### Finance Assistant
+
+Can:
+
+- Summarize cash positions.
+- Analyze expense categories.
+- Summarize receivables.
+- Compare budgets and actual expenses.
+
+It must not independently post journal entries, pay invoices, move funds or change accounting records.
+
+### HR Assistant
+
+Can:
+
+- Summarize authorized workforce reports.
+- Analyze workload.
+- Help create training plans.
+- Support performance review preparation.
+
+It must not make automated hiring, dismissal, salary or disciplinary decisions.
+
+### Marketing Assistant
+
+Can:
+
+- Analyze campaign performance.
+- Suggest content ideas.
+- Summarize performance.
+- Identify trends in available data.
+
+### Support Assistant
+
+Can:
+
+- Summarize support tickets.
+- Classify issues.
+- Suggest response drafts.
+- Detect repeated problems.
+
+## 24.2 AI Capabilities
+
+Support:
+
+- Natural language questions.
+- Contextual project summaries.
+- Report explanations.
+- Search across authorized records.
+- Draft generation.
+- Task suggestions.
+- Trend analysis.
+- Risk detection.
+- Workflow recommendations.
+
+## 24.3 AI Security
+
+AI must respect the same permission model as ordinary users.
+
+Implement:
+
+- Role-aware retrieval.
+- Data filtering.
+- Audit logging.
+- Prompt injection protection.
+- Sensitive data redaction.
+- Human approval for actions.
+- Clear source references for factual business answers.
+- Honest handling of missing or stale records.
+
+AI must distinguish between actual database facts, estimates and suggestions.
+
+---
+
+# PART 25 — NOTIFICATIONS & APPROVAL CENTER
+
+Create a centralized notification service.
+
+Notification types:
+
+- Assigned task.
+- Mention.
+- New comment.
+- Due date.
+- Overdue task.
+- Approval request.
+- Approval decision.
+- Project change.
+- Invoice event.
+- Payment event.
+- HR request.
+- Equipment booking.
+- Workflow failure.
+
+Channels:
+
+- In-app notifications.
+- Mobile push notifications when configured.
+- Email notifications when configured.
+
+Provide:
+
+- Read/unread states.
+- Notification preferences.
+- Priority.
+- Entity reference.
+- Action link.
+- Date.
+- Sender.
+
+Build an Approval Inbox.
+
+Users should see only approvals they are authorized to process.
+
+Approvals must include requester, approver, decision, time and comments.
+
+---
+
+# PART 26 — REPORTS & ANALYTICS
+
+Create a unified business analytics system.
+
+## 26.1 CEO Dashboard
+
+Show:
+
+- Total revenue.
+- Expenses.
+- Profit and loss.
+- Cash position.
+- Receivables.
+- Payables.
+- Active projects.
+- Overdue projects.
+- Open deals.
+- Sales conversion.
+- Department performance.
+- Branch performance.
+- Project profitability.
+- Workload distribution.
+- Critical alerts.
+
+## 26.2 Sales Analytics
+
+- Lead volume.
+- Source performance.
+- Conversion rates.
+- Average deal value.
+- Salesperson results.
+- Lost deal reasons.
+- Forecasts.
+
+## 26.3 Project Analytics
+
+- Active projects.
+- Delayed projects.
+- Delivery rate.
+- Budget variance.
+- Cost variance.
+- Contribution margin.
+- Client retention.
+
+## 26.4 Department Analytics
+
+- Tasks completed.
+- Overdue tasks.
+- Review cycles.
+- Output quality.
+- Workload.
+- Delivery reliability.
+
+## 26.5 Financial Analytics
+
+- Profit and Loss.
+- Balance Sheet.
+- Cash Flow.
+- Trial Balance.
+- Accounts Receivable.
+- Accounts Payable.
+- Expense Analysis.
+- Branch Profitability.
+- Project Contribution Margin.
+- Budget vs Actual.
+
+## 26.6 KPI Definitions
+
+Every KPI must define:
+
+- Name.
+- Purpose.
+- Formula.
+- Data source.
+- Reporting period.
+- Filters.
+- Owner.
+
+Do not calculate KPIs from incomplete or unrelated sample data.
+
+Display the calculation period and data freshness.
+
+---
+
+# PART 27 — MOBILE EXPERIENCE
+
+The desktop and mobile experiences must share the same backend and business rules.
+
+Initial mobile deliverable:
+
+- Responsive web application.
+- PWA capability where supported.
+- Mobile-first employee workspace.
+- Touch-friendly interaction.
+- Push notifications when configured.
+
+Native Android can be developed as a companion using the same APIs after the web backend is stable.
+
+Mobile features:
+
+- Secure login.
+- My Tasks.
+- Task updates.
+- Task comments.
+- File uploads.
+- Notifications.
+- Approvals.
+- Calendar.
+- Attendance.
+- Expense submissions.
+- Equipment booking.
+- Project summaries.
+- Authorized manager dashboard.
+
+## Offline Support
+
+Support offline access only where safe.
+
+Potential offline actions:
+
+- View previously synchronized tasks.
+- Draft comments.
+- Prepare task updates.
+- Queue safe file metadata changes.
+
+When reconnecting:
+
+- Synchronize data.
+- Detect conflicts.
+- Resolve conflicts explicitly.
+- Prevent duplicate operations.
+- Report synchronization errors.
+
+Do not allow offline synchronization to silently overwrite accounting or approval records.
+
+---
+
+# PART 28 — DATABASE SCHEMA SPECIFICATION
+
+Create a normalized PostgreSQL schema.
+
+Use UUID primary keys and explicit foreign keys.
+
+Use created_at and updated_at consistently.
+
+Use deleted_at only for entities where soft deletion is appropriate.
+
+Do not physically delete posted accounting transactions.
+
+Use numeric or decimal data types for monetary values. Never use floating-point arithmetic for money.
+
+Use indexes for common filters and joins.
+
+Use unique constraints to prevent duplicate records.
+
+Use migrations for every schema change.
+
+The following is the minimum conceptual schema. Expand it where necessary without duplicating entities.
+
+## 28.1 Organization Tables
+
+- companies
+- branches
+- departments
+- teams
+- positions
+- employee_departments
+- employee_teams
+- employee_branches
+- company_settings
+
+## 28.2 Authentication & Authorization
+
+- users
+- employees
+- roles
+- permissions
+- role_permissions
+- user_roles
+- user_sessions
+- access_scopes
+- employee_documents
+
+## 28.3 CRM & Sales
+
+- clients
+- client_contacts
+- leads
+- lead_sources
+- lead_activities
+- deals
+- deal_services
+- sales_activities
+- proposals
+- proposal_items
+- proposal_versions
+- contracts
+- contract_services
+- contract_milestones
+- contract_payment_terms
+- contract_documents
+
+## 28.4 Service Catalog
+
+- services
+- service_categories
+- service_prices
+- service_templates
+- service_template_tasks
+- service_deliverables
+- revision_policies
+
+## 28.5 Projects
+
+- projects
+- project_services
+- project_members
+- project_phases
+- project_milestones
+- project_budgets
+- project_costs
+- project_risks
+- project_change_requests
+- work_orders
+
+## 28.6 Tasks
+
+- tasks
+- task_assignments
+- task_dependencies
+- task_checklists
+- task_comments
+- task_attachments
+- task_reviews
+- task_revisions
+- task_status_history
+- task_time_logs
+
+## 28.7 Creative Production
+
+- shoot_requests
+- shoot_sessions
+- shoot_locations
+- shoot_crew
+- shot_lists
+- equipment_reservations
+- media_assets
+- editing_jobs
+- design_jobs
+- content_items
+- content_calendar
+- campaigns
+- deliverables
+- deliverable_versions
+- approvals
+
+## 28.8 Finance
+
+- chart_of_accounts
+- accounting_periods
+- journal_entries
+- journal_lines
+- cost_centers
+- invoices
+- invoice_lines
+- customer_payments
+- payment_allocations
+- credit_notes
+- vendors
+- vendor_bills
+- vendor_payments
+- expense_claims
+- expenses
+- cash_accounts
+- cash_transactions
+- bank_accounts
+- bank_transfers
+- reconciliations
+- budgets
+- budget_lines
+- payroll_periods
+- payroll_records
+- salary_components
+- fixed_assets
+- asset_depreciations
+
+## 28.9 Procurement & Assets
+
+- purchase_requests
+- purchase_request_items
+- purchase_orders
+- purchase_order_items
+- goods_receipts
+- assets
+- asset_categories
+- asset_assignments
+- asset_transfers
+- asset_maintenance
+- inventory_items
+- inventory_movements
+
+## 28.10 HR
+
+- employment_contracts
+- attendance_records
+- work_schedules
+- leave_types
+- leave_requests
+- holidays
+- performance_reviews
+- performance_goals
+- training_records
+- recruitment_requests
+- job_applications
+- employee_offboarding
+
+## 28.11 Support
+
+- support_tickets
+- ticket_messages
+- ticket_assignments
+- ticket_categories
+- ticket_resolutions
+- customer_feedback
+
+## 28.12 Shared Services
+
+- files
+- folders
+- file_versions
+- notifications
+- notification_preferences
+- comments
+- activity_logs
+- audit_logs
+- approval_requests
+- approval_actions
+- workflow_definitions
+- workflow_triggers
+- workflow_executions
+- workflow_execution_logs
+- ai_sessions
+- ai_messages
+- ai_action_requests
+- system_settings
+
+## 28.13 Important Relationships
+
+- One company owns multiple branches.
+- One branch contains multiple employees.
+- One employee can belong to multiple departments.
+- One employee can belong to multiple teams.
+- One user can have multiple roles.
+- One client can have multiple contacts.
+- One client can have multiple leads and deals.
+- One deal can generate a proposal.
+- A successful deal can lead to a signed contract.
+- One contract can cover multiple services.
+- One contracted service can generate an independent project.
+- One project can have many work orders and tasks.
+- One task can have multiple assignments or collaborators.
+- One project can have multiple deliverables.
+- One project can generate costs and invoices.
+- One invoice can receive multiple payments.
+- One payment can be allocated across multiple invoices where permitted.
+- One branch can have multiple cash accounts.
+- One asset can be transferred between branches.
+- Every posted journal entry has balanced journal lines.
+
+Maintain referential integrity throughout the schema.
+
+---
+
+# PART 29 — API ARCHITECTURE
+
+Use versioned REST APIs.
+
+Base prefix:
+
+/api/v1
+
+Example route groups:
+
+Authentication:
+
+- POST /auth/login
+- POST /auth/logout
+- POST /auth/refresh
+- POST /auth/invitations
+- POST /auth/password-reset
+
+Company:
+
+- GET /company
+- GET /branches
+- POST /branches
+- PATCH /branches/:id
+
+CRM:
+
+- GET /leads
+- POST /leads
+- GET /leads/:id
+- PATCH /leads/:id
+- POST /leads/:id/activities
+- POST /leads/:id/convert
+
+Sales:
+
+- GET /deals
+- POST /deals
+- GET /proposals
+- POST /proposals
+- POST /contracts
+
+Projects:
+
+- GET /projects
+- POST /projects
+- GET /projects/:id
+- POST /projects/:id/work-orders
+- POST /projects/:id/tasks
+
+Tasks:
+
+- GET /tasks
+- POST /tasks
+- PATCH /tasks/:id
+- POST /tasks/:id/assign
+- POST /tasks/:id/reviews
+- POST /tasks/:id/revisions
+
+Finance:
+
+- GET /finance/dashboard
+- GET /finance/invoices
+- POST /finance/invoices
+- POST /finance/payments
+- POST /finance/expenses
+- POST /finance/journals
+- POST /finance/journals/:id/post
+
+HR:
+
+- GET /employees
+- POST /employees
+- GET /attendance
+- POST /leaves
+- POST /leaves/:id/approve
+
+AI:
+
+- POST /ai/chat
+- POST /ai/summarize
+- POST /ai/suggestions
+- POST /ai/actions/:id/approve
+
+Implement proper:
+
+- HTTP status codes.
+- Request validation.
+- Response schemas.
+- Pagination.
+- Sorting.
+- Filtering.
+- Error handling.
+- Authentication.
+- Authorization.
+- Rate limiting for sensitive endpoints.
+- Logging.
+
+Never expose database credentials or external API secrets in API responses.
+
+---
+
+# PART 30 — DATA VALIDATION & BUSINESS RULES
+
+Enforce business validation at the backend, not just in frontend forms.
+
+Examples:
+
+1. A task cannot be assigned to an inactive employee.
+2. An invoice cannot reference a nonexistent client.
+3. A payment cannot exceed valid allocated amounts.
+4. A posted journal entry must be balanced.
+5. A financial period marked closed cannot receive ordinary new postings.
+6. A project cannot be marked completed if mandatory deliverables are incomplete.
+7. A contract must contain at least one defined service before activation.
+8. A freelancer cannot access unrelated clients.
+9. An employee cannot approve restricted transactions without permission.
+10. A branch manager cannot access unrelated branch information.
+11. A cash transfer must have a valid source and destination.
+12. Duplicate payment processing must be prevented.
+13. A task marked complete must satisfy required checklist conditions.
+14. An approval action must be recorded with the current user and timestamp.
+
+For important operations, use database transactions.
+
+---
+
+# PART 31 — AUDIT, SECURITY & PRIVACY
+
+Security is a core product requirement.
+
+Implement:
+
+- Authentication.
+- Role-based authorization.
+- Resource-level access.
+- Branch-level access.
+- Department-level access.
+- Input validation.
+- SQL injection protection.
+- XSS protection.
+- CSRF protection when applicable.
+- Secure file access.
+- Rate limiting.
+- Session management.
+- Secrets management.
+- Encryption in transit.
+- Secure backups.
+- Audit logs.
+
+## Audit Logs
+
+Track:
+
+- User.
+- Action.
+- Entity.
+- Entity ID.
+- Before value where appropriate.
+- After value where appropriate.
+- Timestamp.
+- IP or session context when appropriate.
+- Branch context.
+
+Audit logs must be protected from ordinary user modification.
+
+Do not log passwords, authentication tokens, full payment credentials or unnecessary sensitive information.
+
+## Sensitive Data
+
+Restrict access to:
+
+- Salary information.
+- Employment documents.
+- Tax details.
+- Customer contracts.
+- Financial reports.
+- Bank information.
+- Confidential company documents.
+
+The AI assistant must inherit the user's access restrictions.
+
+---
+
+# PART 32 — SEARCH & COMMAND CENTER
+
+Build global search across authorized records.
+
+Searchable entities:
+
+- Clients.
+- Leads.
+- Employees.
+- Projects.
+- Tasks.
+- Contracts.
+- Invoices.
+- Files.
+- Tickets.
+- Assets.
+
+Include a Quick Create command menu:
+
+- New Lead.
+- New Client.
+- New Project.
+- New Task.
+- New Expense.
+- New Invoice.
+- New Support Ticket.
+- New Purchase Request.
+
+Only show actions the current user can perform.
+
+---
+
+# PART 33 — SAMPLE DATA & DEMO ENVIRONMENT
+
+For initial interface demonstration, create clearly labeled demo data.
+
+Example entities:
+
+- Demo client.
+- Demo project.
+- Demo team.
+- Demo tasks.
+- Demo invoice.
+- Demo expense.
+
+Rules:
+
+- Demo data must be distinguishable from production.
+- Never mix demo transactions with real financial reports.
+- Never present example revenue as actual company revenue.
+- Provide a clean database initialization process.
+- Provide a secure first-administrator setup.
+- Allow demo data to be removed safely.
+
+Do not invent actual company employees or financial balances.
+
+---
+
+# PART 34 — TESTING & QUALITY ASSURANCE
+
+Every module needs functional testing.
+
+## 34.1 Frontend Tests
+
+Test:
+
+- Navigation.
+- Forms.
+- Validation.
+- Tables.
+- Filters.
+- Sorting.
+- Dialogs.
+- Loading states.
+- Empty states.
+- Responsive layouts.
+- RTL layout.
+- Dark mode.
+- Accessibility.
+
+## 34.2 Backend Tests
+
+Test:
+
+- Authentication.
+- Authorization.
+- Database operations.
+- Business rules.
+- Error handling.
+- Transactions.
+- Idempotency.
+- Data relationships.
+- API validation.
+
+## 34.3 Financial Tests
+
+Mandatory:
+
+- Balanced journal entries.
+- Partial invoice payments.
+- Multiple payment allocations.
+- Overdue invoice calculation.
+- Cash transfer accounting.
+- Expense approvals.
+- Reconciliation.
+- Period closing.
+- Reversal entries.
+- Branch-level financial reports.
+
+## 34.4 Security Tests
+
+Test:
+
+- Unauthorized record access.
+- Cross-branch data leakage.
+- Payroll access.
+- Role escalation.
+- Invalid session.
+- File access.
+- API abuse.
+- Sensitive data exposure.
+
+## 34.5 End-to-End Business Test
+
+Test this entire journey:
+
+1. Create a lead.
+2. Assign a salesperson.
+3. Record sales activities.
+4. Qualify the lead.
+5. Create a deal.
+6. Create a proposal.
+7. Approve the proposal.
+8. Create a contract.
+9. Activate the contracted service.
+10. Create the corresponding project.
+11. Generate the project workflow.
+12. Assign employees.
+13. Create operational tasks.
+14. Complete production.
+15. Perform internal review.
+16. Record revisions.
+17. Approve deliverables.
+18. Create an invoice.
+19. Record a partial payment.
+20. Record project expenses.
+21. Reconcile project costs.
+22. Calculate project contribution margin.
+23. Close the project.
+
+The test must prove that all these modules share consistent records.
+
+---
+
+# PART 35 — DEPLOYMENT & ENVIRONMENT MANAGEMENT
+
+Prepare separate environments:
+
+- Development.
+- Staging.
+- Production.
+
+Environment variables must be securely managed.
+
+Examples:
+
+- DATABASE_URL
+- AUTH configuration.
+- STORAGE configuration.
+- GEMINI_API_KEY.
+- APP_BASE_URL.
+- EMAIL service configuration.
+
+Never hardcode secrets.
+
+Never commit secret values into the repository.
+
+Create:
+
+- Environment setup guide.
+- Database setup guide.
+- Migration instructions.
+- Backup guide.
+- Recovery guide.
+- Deployment guide.
+- Admin onboarding guide.
+
+Do not publish a production application with insecure demo credentials.
+
+---
+
+# PART 36 — IMPLEMENTATION ROADMAP
+
+Build in controlled phases.
+
+Do not try to produce a shallow implementation of every module in one generation.
+
+However, understand the complete architecture from day one.
+
+## PHASE 0 — Architecture & Foundation
+
+Deliver:
+
+- Project architecture.
+- Folder structure.
+- Design system.
+- Database schema plan.
+- Authentication design.
+- Authorization design.
+- Shared components.
+- Routing.
+- API structure.
+- Error handling.
+- Logging.
+
+## PHASE 1 — Company Core
+
+Build:
+
+- Authentication.
+- Users.
+- Employees.
+- Departments.
+- Teams.
+- Branches.
+- Roles.
+- Permissions.
+- Dashboard.
+- My Workspace.
+- Notifications.
+- Audit logs.
+
+## PHASE 2 — CRM & Sales
+
+Build:
+
+- Clients.
+- Leads.
+- Activities.
+- Pipeline.
+- Deals.
+- Proposals.
+- Contracts.
+- Service Catalog.
+
+## PHASE 3 — Projects & Tasks
+
+Build:
+
+- Projects.
+- Work orders.
+- Task management.
+- Calendar.
+- Resource allocation.
+- Reviews.
+- Revisions.
+- Deliverables.
+
+## PHASE 4 — Creative Operations
+
+Build:
+
+- Media production.
+- Equipment booking.
+- Editing.
+- Graphic design.
+- Marketing.
+- Development workflows.
+- File management.
+
+## PHASE 5 — Finance
+
+Build:
+
+- Chart of Accounts.
+- General Ledger.
+- Journals.
+- Invoices.
+- Payments.
+- Expenses.
+- Treasury.
+- Procurement.
+- Assets.
+- Payroll.
+- Financial reports.
+
+## PHASE 6 — HR & Advanced Operations
+
+Build:
+
+- Attendance.
+- Hybrid work.
+- Leaves.
+- Performance.
+- Recruitment.
+- Customer support.
+- Knowledge base.
+
+## PHASE 7 — Automation & Intelligence
+
+Build:
+
+- Workflow automation.
+- AI assistant.
+- Notifications.
+- Business analytics.
+- Predictive insights where supported.
+
+## PHASE 8 — Mobile Experience
+
+Build:
+
+- Responsive employee workspace.
+- PWA features.
+- Mobile navigation.
+- Offline-safe synchronization.
+- Mobile approvals.
+- Push notifications when configured.
+
+Prepare the backend API for a separate native Android companion using the same business logic.
+
+---
+
+# PART 37 — UI/UX PAGE REQUIREMENTS
+
+Every major page must have:
+
+1. Clear page title.
+2. Contextual description.
+3. Primary action.
+4. Filters.
+5. Search.
+6. Appropriate data view.
+7. Pagination when necessary.
+8. Loading state.
+9. Empty state.
+10. Error state.
+11. Permission-aware actions.
+
+## Standard List Page
+
+Each list page should support:
+
+- Search.
+- Filters.
+- Sorting.
+- Pagination.
+- Column selection where appropriate.
+- Export where authorized.
+- Bulk operations where safe.
+- Quick view.
+- Detail page navigation.
+- Create action.
+
+## Standard Detail Page
+
+Each detail page should support:
+
+- Overview.
+- Key information.
+- Status.
+- Owner.
+- Related records.
+- Timeline.
+- Comments.
+- Attachments.
+- Activity history.
+- Approvals.
+- Relevant actions.
+
+## Standard Form Page
+
+Forms should:
+
+- Group related fields.
+- Use appropriate field types.
+- Validate inputs.
+- Explain errors.
+- Preserve entered values after validation errors.
+- Prevent accidental duplicate submission.
+- Show confirmation for destructive actions.
+
+Do not overload screens with unnecessary fields.
+
+Use conditional fields depending on record type and user role.
+
+---
+
+# PART 38 — CRITICAL UX REQUIREMENTS
+
+Follow these standards:
+
+- Arabic-first experience.
+- Correct RTL support.
+- Clear typography.
+- Consistent spacing.
+- No horizontal overflow in standard views.
+- Tables must remain usable on mobile.
+- Important actions must be visible.
+- Destructive actions require confirmation.
+- Long forms must be grouped logically.
+- Search must be accessible.
+- Notifications must be understandable.
+- Errors must explain what happened and how to recover.
+- Empty states must offer a relevant next action.
+- Use color consistently for statuses.
+- Do not use colors as the only indicator of meaning.
+
+Avoid:
+
+- Excessive animation.
+- Unnecessary visual effects.
+- Cluttered dashboards.
+- Random card sizes.
+- Inconsistent buttons.
+- Inconsistent typography.
+- Repetitive forms.
+- Misleading charts.
+- Fake live data.
+- Non-functional navigation.
+
+---
+
+# PART 39 — REQUIRED PROJECT DOCUMENTATION
+
+Maintain these documents in the project repository.
+
+1. README.md
+2. SYSTEM_OVERVIEW.md
+3. PRODUCT_REQUIREMENTS.md
+4. SYSTEM_ARCHITECTURE.md
+5. DATABASE_SCHEMA.md
+6. DATABASE_RELATIONSHIPS.md
+7. API_DOCUMENTATION.md
+8. ORGANIZATION_STRUCTURE.md
+9. RBAC_PERMISSION_MATRIX.md
+10. BUSINESS_WORKFLOWS.md
+11. FINANCIAL_RULES.md
+12. UI_UX_DESIGN_SYSTEM.md
+13. AUTOMATION_SPECIFICATION.md
+14. AI_GOVERNANCE.md
+15. SECURITY_POLICY.md
+16. TEST_PLAN.md
+17. DEPLOYMENT_GUIDE.md
+18. CHANGELOG.md
+19. IMPLEMENTATION_ROADMAP.md
+
+Update the documents whenever a major design or system decision changes.
+
+---
+
+# PART 40 — STRICT DEVELOPMENT RULES
+
+These instructions are mandatory.
+
+### Rule 1 — Understand Before Building
+
+Inspect the current project files and runtime environment before modifying anything.
+
+If the project is empty, create the required structure.
+
+If the project already exists, preserve working functionality and inspect the architecture first.
+
+### Rule 2 — No Destructive Changes
+
+Do not overwrite working modules without understanding their dependencies.
+
+Do not delete useful files without justification.
+
+Do not reset real database data.
+
+Do not expose secrets.
+
+### Rule 3 — No Fake Functionality
+
+Never claim a feature works unless it has been implemented and tested.
+
+A button must perform a real action.
+
+A form must save valid data.
+
+A table must read actual stored data.
+
+A workflow must execute its defined steps.
+
+A report must derive from real records.
+
+### Rule 4 — No Unnecessary Duplication
+
+Do not create duplicate components, models, tables or business logic.
+
+Reuse shared utilities and design components.
+
+### Rule 5 — Type Safety
+
+Use TypeScript strict mode.
+
+Avoid unnecessary use of `any`.
+
+Define shared types and API contracts.
+
+### Rule 6 — Backend Validation
+
+Every sensitive business rule must be enforced on the server.
+
+Never rely on frontend validation alone.
+
+### Rule 7 — Database Integrity
+
+Use migrations.
+
+Use foreign keys.
+
+Use transactions.
+
+Use constraints.
+
+Use proper indexing.
+
+### Rule 8 — Permission Enforcement
+
+Permissions must be checked on backend endpoints and database access paths.
+
+Hiding a button is not sufficient authorization.
+
+### Rule 9 — Quality Before Quantity
+
+Build a smaller number of fully functional modules before creating dozens of incomplete pages.
+
+### Rule 10 — Maintain Context
+
+Keep the approved architecture and decisions available throughout the project.
+
+Do not change the color palette, business model, data ownership or naming conventions randomly between tasks.
+
+### Rule 11 — Honest Reporting
+
+At the end of each implementation phase, report:
+
+- What was implemented.
+- What is functional.
+- What was tested.
+- What remains incomplete.
+- Which integrations are actually connected.
+- Which settings require manual configuration.
+- Any technical limitations.
+- Known risks.
+
+### Rule 12 — Do Not Stop at Static UI
+
+After implementing a screen, connect it to its real backend service and database.
+
+If the backend is not yet available, clearly mark the screen as incomplete, not production-ready.
+
+---
+
+# PART 41 — REQUIRED FIRST EXECUTION
+
+Now begin working on BALANCE OS.
+
+Follow this exact sequence:
+
+**STEP 1 — Inspect the environment**
+
+Determine:
+
+- Current application structure.
+- Supported frontend framework.
+- Available backend runtime.
+- Available packages.
+- Authentication integration options.
+- Database provisioning options.
+- Secret management.
+- Storage integration.
+- Deployment constraints.
+
+Do not invent unavailable capabilities.
+
+**STEP 2 — Create the architecture**
+
+Prepare the technical architecture, module structure, database design, business workflows and permission model.
+
+Create the required project documentation.
+
+**STEP 3 — Create the visual foundation**
+
+Build:
+
+- Balance design system.
+- Arabic RTL layout.
+- English LTR foundation.
+- Sidebar.
+- Top bar.
+- Responsive shell.
+- Dashboard framework.
+- Global search.
+- Notifications.
+- User profile.
+- Light and dark themes.
+
+**STEP 4 — Build the first functional modules**
+
+Prioritize:
+
+- Authentication.
+- Users.
+- Employee profiles.
+- Branches.
+- Departments.
+- Teams.
+- Roles.
+- Permissions.
+- My Workspace.
+- Dashboard.
+
+Connect these modules to persistent data storage and test them.
+
+**STEP 5 — Establish integration contracts**
+
+Define the shared data structures and APIs for all future modules.
+
+Ensure CRM, Projects, Finance, HR and Production will use the same client, user, employee, branch and project identities.
+
+**STEP 6 — Continue implementation incrementally**
+
+Proceed through the roadmap.
+
+Do not stop after generating a dashboard or design preview.
+
+Do not claim all modules are complete merely because navigation entries exist.
+
+**STEP 7 — Verify the application**
+
+Run available checks:
+
+- Build.
+- Type checking.
+- Linting.
+- Database migrations.
+- Authentication tests.
+- Authorization tests.
+- API tests.
+- End-to-end business workflow tests.
+
+Fix errors before considering the relevant phase complete.
+
+---
+
+# PART 42 — FIRST RESPONSE FORMAT
+
+Before implementing, provide a concise architecture summary in the project documentation.
+
+Then begin implementation rather than simply returning a proposal.
+
+Your first progress report must state:
+
+1. Environment findings.
+2. Proposed project structure.
+3. Confirmed technology choices.
+4. Database strategy.
+5. Authentication strategy.
+6. Design system.
+7. Initial implementation scope.
+8. Required external configuration.
+9. Known constraints.
+
+Do not ask unnecessary questions where a reasonable design decision can be made.
+
+Document assumptions rather than silently changing requirements.
+
+If a genuinely critical external decision is required, identify it precisely and continue with independent work.
+
+---
+
+# FINAL PRODUCT VISION
+
+BALANCE OS must become the central operating system of Balance Agency.
+
+When the CEO opens the system, they should understand the company.
+
+When the sales employee opens the system, they should know which customers to contact.
+
+When the project manager opens the system, they should see what is happening and what is blocked.
+
+When the photographer opens the system, they should know the next shoot, the equipment and the project requirements.
+
+When the editor opens the system, they should know which videos to edit, their deadlines and review comments.
+
+When the designer opens the system, they should know the requested deliverables and brand requirements.
+
+When the accountant opens the system, they should know the actual financial position, pending approvals and outstanding balances.
+
+When HR opens the system, they should understand the workforce, attendance and employee records.
+
+When management asks a question, Balance Intelligence should provide a useful answer grounded in authorized company data.
+
+Every department must work within the same integrated system.
+
+**The most important requirement: Build a real business operating system, not a collection of attractive pages.**
+
+The final result must be professional, secure, scalable, maintainable, visually consistent, operationally useful and ready for controlled real-world testing.

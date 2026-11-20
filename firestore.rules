@@ -1,0 +1,477 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Hardened Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isFounder() {
+      return isVerified() && request.auth.token.email == 'sofianamr92@gmail.com';
+    }
+
+    function isAdmin() {
+      return isFounder() || (
+        isVerified() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['ceo', 'general_manager']
+      );
+    }
+
+    function hasRole(allowedRoles) {
+      return isFounder() || (
+        isVerified() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in allowedRoles
+      );
+    }
+
+    function isOwner(uid) {
+      return isVerified() && request.auth.uid == uid;
+    }
+
+    function isValidString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isValidMemberList(listVal) {
+      return listVal is list && listVal.size() >= 1 && listVal.size() <= 100 && listVal[0] is string;
+    }
+
+    function canReadListResource() {
+      return isVerified() && (
+        request.auth.token.email == 'sofianamr92@gmail.com' ||
+        resource.data.ownerUid == request.auth.uid ||
+        (resource.data.memberUids is list && request.auth.uid in resource.data.memberUids)
+      );
+    }
+
+    function canReadSingleResource() {
+      return isAdmin() || (
+        isVerified() && (
+          existing().ownerUid == request.auth.uid ||
+          (existing().memberUids is list && request.auth.uid in existing().memberUids)
+        )
+      );
+    }
+
+    function isValidTimestampsCreate() {
+      return incoming().createdAt == request.time && incoming().updatedAt == request.time;
+    }
+
+    function isValidTimestampsUpdate() {
+      return incoming().createdAt == existing().createdAt && incoming().updatedAt == request.time;
+    }
+
+    // Connectivity probe document
+    match /test/connection {
+      allow get: if isSignedIn();
+      allow list, create, update, delete: if false;
+    }
+
+    // 3. Entity Validation Blueprints
+    function isValidCompany(data) {
+      return data.keys().hasAll(['id', 'name', 'legalName', 'currency', 'timezone', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'name', 'legalName', 'taxId', 'address', 'phone', 'email', 'currency', 'timezone', 'fiscalYearStart', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.name, 1, 120) &&
+        isValidString(data.legalName, 1, 180) &&
+        data.currency in ['EGP', 'USD', 'SAR'] &&
+        isValidString(data.timezone, 1, 64) &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    function isValidBranch(data) {
+      return data.keys().hasAll(['id', 'code', 'name', 'status', 'operationalBudgetPiasters', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'code', 'name', 'nameEn', 'address', 'phone', 'email', 'managerUid', 'status', 'operationalBudgetPiasters', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.code, 1, 24) &&
+        isValidString(data.name, 1, 120) &&
+        data.status in ['active', 'inactive'] &&
+        data.operationalBudgetPiasters is int &&
+        data.operationalBudgetPiasters >= 0 &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    function isValidDepartment(data) {
+      return data.keys().hasAll(['id', 'code', 'name', 'budgetPiasters', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'code', 'name', 'nameEn', 'managerUid', 'budgetPiasters', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.code, 1, 24) &&
+        isValidString(data.name, 1, 120) &&
+        data.budgetPiasters is int &&
+        data.budgetPiasters >= 0 &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'fullName', 'role', 'status', 'ownerUid', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['uid', 'email', 'fullName', 'fullNameEn', 'role', 'branchIds', 'departmentIds', 'teamIds', 'position', 'workModel', 'employmentType', 'status', 'phone', 'joiningDate', 'skills', 'isDemo', 'ownerUid', 'createdAt', 'updatedAt']) &&
+        isValidId(data.uid) &&
+        isValidString(data.email, 3, 160) &&
+        isValidString(data.fullName, 1, 120) &&
+        isValidString(data.role, 1, 64) &&
+        data.status in ['active', 'inactive', 'invited'] &&
+        isValidString(data.ownerUid, 1, 128);
+    }
+
+    function isValidClient(data) {
+      return data.keys().hasAll(['id', 'name', 'phone', 'branchId', 'status', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'name', 'industry', 'phone', 'email', 'location', 'branchId', 'accountManagerUid', 'brandNotes', 'status', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.name, 1, 140) &&
+        isValidString(data.phone, 5, 32) &&
+        isValidString(data.branchId, 1, 64) &&
+        data.status in ['active', 'paused', 'archived'] &&
+        data.isDemo is bool &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    function isValidLead(data) {
+      return data.keys().hasAll(['id', 'businessName', 'contactName', 'phone', 'source', 'stage', 'estimatedBudgetPiasters', 'branchId', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'businessName', 'contactName', 'phone', 'email', 'industry', 'location', 'source', 'stage', 'priority', 'interestedServices', 'estimatedBudgetPiasters', 'assignedUid', 'branchId', 'nextFollowUp', 'notes', 'lostReason', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.businessName, 1, 140) &&
+        isValidString(data.contactName, 1, 120) &&
+        isValidString(data.phone, 5, 32) &&
+        isValidString(data.source, 1, 48) &&
+        isValidString(data.stage, 1, 48) &&
+        data.estimatedBudgetPiasters is int &&
+        data.estimatedBudgetPiasters >= 0 &&
+        data.isDemo is bool &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasAll(['id', 'name', 'clientId', 'branchId', 'departmentId', 'managerUid', 'status', 'approvedRevenuePiasters', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'name', 'clientId', 'contractId', 'serviceId', 'branchId', 'departmentId', 'managerUid', 'status', 'priority', 'startDate', 'dueDate', 'approvedRevenuePiasters', 'estimatedCostPiasters', 'actualCostPiasters', 'progress', 'deliverables', 'notes', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.name, 1, 160) &&
+        isValidString(data.clientId, 1, 64) &&
+        isValidString(data.branchId, 1, 64) &&
+        isValidString(data.departmentId, 1, 64) &&
+        isValidString(data.managerUid, 1, 128) &&
+        data.status in ['draft', 'planning', 'ready', 'active', 'on_hold', 'at_risk', 'under_review', 'completed', 'cancelled'] &&
+        data.approvedRevenuePiasters is int &&
+        data.approvedRevenuePiasters >= 0 &&
+        data.isDemo is bool &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    function isValidTask(data) {
+      return data.keys().hasAll(['id', 'title', 'projectId', 'departmentId', 'assigneeUid', 'priority', 'status', 'dueDate', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'title', 'description', 'projectId', 'clientId', 'departmentId', 'assigneeUid', 'reviewerUid', 'priority', 'status', 'dueDate', 'estimatedHours', 'checklist', 'revisionCount', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.title, 1, 200) &&
+        isValidString(data.projectId, 1, 64) &&
+        isValidString(data.departmentId, 1, 64) &&
+        isValidString(data.assigneeUid, 1, 128) &&
+        data.priority in ['low', 'medium', 'high', 'urgent'] &&
+        data.status in ['backlog', 'ready', 'assigned', 'in_progress', 'on_hold', 'internal_review', 'client_approval', 'revision', 'approved', 'completed', 'cancelled'] &&
+        isValidString(data.dueDate, 1, 32) &&
+        data.isDemo is bool &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    function isValidJournalEntry(data) {
+      return data.keys().hasAll(['id', 'entryNumber', 'date', 'description', 'periodId', 'branchId', 'status', 'totalDebitPiasters', 'totalCreditPiasters', 'lines', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'entryNumber', 'date', 'description', 'periodId', 'branchId', 'referenceType', 'referenceId', 'status', 'totalDebitPiasters', 'totalCreditPiasters', 'lines', 'reversedEntryId', 'approvedByUid', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.entryNumber, 1, 40) &&
+        isValidString(data.date, 1, 32) &&
+        isValidString(data.description, 1, 300) &&
+        isValidString(data.periodId, 1, 64) &&
+        isValidString(data.branchId, 1, 64) &&
+        data.status in ['draft', 'posted', 'reversed'] &&
+        data.totalDebitPiasters is int &&
+        data.totalCreditPiasters is int &&
+        data.totalDebitPiasters > 0 &&
+        data.totalDebitPiasters == data.totalCreditPiasters &&
+        data.lines is list &&
+        data.lines.size() >= 2 &&
+        data.lines.size() <= 50 &&
+        data.isDemo is bool &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    function isValidExpense(data) {
+      return data.keys().hasAll(['id', 'description', 'amountPiasters', 'branchId', 'departmentId', 'requesterUid', 'status', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'description', 'category', 'amountPiasters', 'date', 'branchId', 'departmentId', 'projectId', 'paymentMethod', 'requesterUid', 'approverUid', 'approvalComment', 'status', 'journalEntryId', 'isDemo', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.description, 1, 240) &&
+        data.amountPiasters is int &&
+        data.amountPiasters > 0 &&
+        isValidString(data.branchId, 1, 64) &&
+        isValidString(data.departmentId, 1, 64) &&
+        isValidString(data.requesterUid, 1, 128) &&
+        data.status in ['submitted', 'manager_review', 'finance_review', 'approved', 'posted', 'paid', 'rejected'] &&
+        data.isDemo is bool &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    function isValidAuditLog(data) {
+      return data.keys().hasAll(['id', 'actorUid', 'action', 'entity', 'entityId', 'summary', 'ownerUid', 'memberUids', 'createdAt']) &&
+        data.keys().hasOnly(['id', 'actorUid', 'action', 'entity', 'entityId', 'summary', 'branchId', 'ownerUid', 'memberUids', 'createdAt']) &&
+        isValidId(data.id) &&
+        isValidString(data.actorUid, 1, 128) &&
+        isValidString(data.action, 1, 64) &&
+        isValidString(data.entity, 1, 64) &&
+        isValidString(data.entityId, 1, 64) &&
+        isValidString(data.summary, 1, 300) &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    function isValidGenericModuleRecord(data) {
+      return data.keys().hasAll(['id', 'ownerUid', 'memberUids', 'createdAt', 'updatedAt']) &&
+        data.size() <= 40 &&
+        isValidId(data.id) &&
+        isValidString(data.ownerUid, 1, 128) &&
+        isValidMemberList(data.memberUids);
+    }
+
+    // 4. Collection Rules
+
+    match /companies/{companyId} {
+      allow get: if isValidId(companyId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(companyId) && isAdmin() && isValidCompany(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(companyId) && isAdmin() && isValidCompany(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate() && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'legalName', 'taxId', 'address', 'phone', 'email', 'currency', 'timezone', 'fiscalYearStart', 'memberUids', 'updatedAt']);
+      allow delete: if false;
+    }
+
+    match /branches/{branchId} {
+      allow get: if isValidId(branchId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(branchId) && isAdmin() && isValidBranch(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(branchId) && isAdmin() && isValidBranch(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate() && incoming().diff(existing()).affectedKeys().hasOnly(['code', 'name', 'nameEn', 'address', 'phone', 'email', 'managerUid', 'status', 'operationalBudgetPiasters', 'memberUids', 'updatedAt']);
+      allow delete: if isValidId(branchId) && isAdmin();
+    }
+
+    match /departments/{departmentId} {
+      allow get: if isValidId(departmentId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(departmentId) && isAdmin() && isValidDepartment(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(departmentId) && isAdmin() && isValidDepartment(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate() && incoming().diff(existing()).affectedKeys().hasOnly(['code', 'name', 'nameEn', 'managerUid', 'budgetPiasters', 'memberUids', 'updatedAt']);
+      allow delete: if isValidId(departmentId) && isAdmin();
+    }
+
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || hasRole(['ceo', 'general_manager', 'hr_manager']));
+      allow list: if isVerified() && (request.auth.token.email == 'sofianamr92@gmail.com' || resource.data.ownerUid == request.auth.uid);
+      allow create: if isValidId(userId) && isVerified() && isValidUser(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate() && (
+        isAdmin() ||
+        (isOwner(userId) && incoming().role == 'employee' && incoming().status == 'active')
+      );
+      allow update: if isValidId(userId) && isVerified() && isValidUser(incoming()) && incoming().ownerUid == existing().ownerUid && incoming().uid == existing().uid && isValidTimestampsUpdate() && (
+        (isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'fullNameEn', 'role', 'branchIds', 'departmentIds', 'teamIds', 'position', 'workModel', 'employmentType', 'status', 'phone', 'joiningDate', 'skills', 'updatedAt'])) ||
+        (isOwner(userId) && incoming().role == existing().role && incoming().status == existing().status && incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'fullNameEn', 'phone', 'skills', 'workModel', 'updatedAt']))
+      );
+      allow delete: if isValidId(userId) && isAdmin();
+
+      // Split Collection PII Isolation
+      match /private/{docId} {
+        allow get: if isValidId(userId) && isValidId(docId) && (isOwner(userId) || hasRole(['ceo', 'general_manager', 'hr_manager', 'accountant']));
+        allow list: if isVerified() && (request.auth.token.email == 'sofianamr92@gmail.com' || userId == request.auth.uid);
+        allow create: if isValidId(userId) && isValidId(docId) && hasRole(['ceo', 'general_manager', 'hr_manager']) && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+        allow update: if isValidId(userId) && isValidId(docId) && hasRole(['ceo', 'general_manager', 'hr_manager']) && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate();
+        allow delete: if isValidId(userId) && isValidId(docId) && isAdmin();
+      }
+    }
+
+    match /invitations/{invitationId} {
+      allow get: if isValidId(invitationId) && (isAdmin() || (isVerified() && existing().email == request.auth.token.email));
+      allow list: if isVerified() && (request.auth.token.email == 'sofianamr92@gmail.com' || resource.data.email == request.auth.token.email);
+      allow create: if isValidId(invitationId) && isAdmin() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(invitationId) && isAdmin() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate();
+      allow delete: if isValidId(invitationId) && isAdmin();
+    }
+
+    match /roles/{roleId} {
+      allow get: if isValidId(roleId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(roleId) && isAdmin() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(roleId) && isAdmin() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate();
+      allow delete: if isValidId(roleId) && isAdmin();
+    }
+
+    match /clients/{clientId} {
+      allow get: if isValidId(clientId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(clientId) && hasRole(['ceo', 'general_manager', 'branch_manager', 'sales_rep', 'project_manager']) && isValidClient(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(clientId) && hasRole(['ceo', 'general_manager', 'branch_manager', 'sales_rep', 'project_manager']) && isValidClient(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate() && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'industry', 'phone', 'email', 'location', 'branchId', 'accountManagerUid', 'brandNotes', 'status', 'memberUids', 'updatedAt']);
+      allow delete: if isValidId(clientId) && isAdmin();
+    }
+
+    match /leads/{leadId} {
+      allow get: if isValidId(leadId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(leadId) && hasRole(['ceo', 'general_manager', 'branch_manager', 'sales_rep']) && isValidLead(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(leadId) && (isAdmin() || (hasRole(['branch_manager', 'sales_rep']) && canReadSingleResource())) && isValidLead(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate() && incoming().diff(existing()).affectedKeys().hasOnly(['businessName', 'contactName', 'phone', 'email', 'industry', 'location', 'source', 'stage', 'priority', 'interestedServices', 'estimatedBudgetPiasters', 'assignedUid', 'branchId', 'nextFollowUp', 'notes', 'lostReason', 'memberUids', 'updatedAt']);
+      allow delete: if isValidId(leadId) && isAdmin();
+    }
+
+    match /projects/{projectId} {
+      allow get: if isValidId(projectId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(projectId) && hasRole(['ceo', 'general_manager', 'branch_manager', 'project_manager', 'department_manager']) && isValidProject(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(projectId) && (
+        isAdmin() ||
+        (hasRole(['branch_manager', 'project_manager', 'department_manager']) && canReadSingleResource())
+      ) && isValidProject(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate() && (
+        existing().status != 'completed' || isAdmin()
+      ) && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'clientId', 'contractId', 'serviceId', 'branchId', 'departmentId', 'managerUid', 'status', 'priority', 'startDate', 'dueDate', 'approvedRevenuePiasters', 'estimatedCostPiasters', 'actualCostPiasters', 'progress', 'deliverables', 'notes', 'memberUids', 'updatedAt']);
+      allow delete: if isValidId(projectId) && isAdmin();
+    }
+
+    match /tasks/{taskId} {
+      allow get: if isValidId(taskId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(taskId) && isVerified() && exists(/databases/$(database)/documents/projects/$(incoming().projectId)) && isValidTask(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(taskId) && canReadSingleResource() && isValidTask(incoming()) && incoming().ownerUid == existing().ownerUid && incoming().projectId == existing().projectId && isValidTimestampsUpdate() && (
+        isAdmin() ||
+        (hasRole(['project_manager', 'department_manager', 'team_leader']) && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'departmentId', 'assigneeUid', 'reviewerUid', 'priority', 'status', 'dueDate', 'estimatedHours', 'checklist', 'revisionCount', 'memberUids', 'updatedAt'])) ||
+        (existing().assigneeUid == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'checklist', 'updatedAt']))
+      );
+      allow delete: if isValidId(taskId) && hasRole(['ceo', 'general_manager', 'project_manager']);
+    }
+
+    match /fiscalPeriods/{periodId} {
+      allow get: if isValidId(periodId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(periodId) && hasRole(['ceo', 'general_manager', 'accountant']) && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(periodId) && hasRole(['ceo', 'general_manager', 'accountant']) && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate();
+      allow delete: if false;
+    }
+
+    match /journalEntries/{entryId} {
+      allow get: if isValidId(entryId) && hasRole(['ceo', 'general_manager', 'accountant', 'branch_manager']) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(entryId) && hasRole(['ceo', 'general_manager', 'accountant']) && isValidJournalEntry(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(entryId) && hasRole(['ceo', 'general_manager', 'accountant']) && isValidJournalEntry(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate() && (
+        (existing().status == 'draft' && incoming().diff(existing()).affectedKeys().hasOnly(['date', 'description', 'status', 'lines', 'totalDebitPiasters', 'totalCreditPiasters', 'approvedByUid', 'updatedAt'])) ||
+        (existing().status == 'posted' && incoming().status == 'reversed' && incoming().totalDebitPiasters == existing().totalDebitPiasters && incoming().totalCreditPiasters == existing().totalCreditPiasters && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'reversedEntryId', 'updatedAt']))
+      );
+      allow delete: if false;
+    }
+
+    match /expenses/{expenseId} {
+      allow get: if isValidId(expenseId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(expenseId) && isVerified() && isValidExpense(incoming()) && incoming().ownerUid == request.auth.uid && incoming().requesterUid == request.auth.uid && incoming().status == 'submitted' && isValidTimestampsCreate();
+      allow update: if isValidId(expenseId) && isValidExpense(incoming()) && incoming().ownerUid == existing().ownerUid && incoming().requesterUid == existing().requesterUid && isValidTimestampsUpdate() && (
+        (isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'approverUid', 'approvalComment', 'journalEntryId', 'updatedAt'])) ||
+        (hasRole(['department_manager', 'branch_manager', 'accountant']) && request.auth.uid != existing().requesterUid && incoming().approverUid == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'approverUid', 'approvalComment', 'journalEntryId', 'updatedAt']))
+      );
+      allow delete: if isValidId(expenseId) && isAdmin() && existing().status == 'submitted';
+    }
+
+    match /approvals/{approvalId} {
+      allow get: if isValidId(approvalId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(approvalId) && isVerified() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == request.auth.uid && incoming().requesterUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(approvalId) && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate() && (
+        isAdmin() ||
+        (hasRole(['department_manager', 'branch_manager', 'accountant', 'hr_manager']) && request.auth.uid != existing().requesterUid)
+      );
+      allow delete: if isValidId(approvalId) && isAdmin();
+    }
+
+    match /workflows/{workflowId} {
+      allow get: if isValidId(workflowId) && canReadSingleResource();
+      allow list: if canReadListResource();
+      allow create: if isValidId(workflowId) && isAdmin() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(workflowId) && isAdmin() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate();
+      allow delete: if isValidId(workflowId) && isAdmin();
+    }
+
+    match /payrollRuns/{payrollId} {
+      allow get: if isValidId(payrollId) && hasRole(['ceo', 'general_manager', 'hr_manager', 'accountant']);
+      allow list: if isVerified() && (request.auth.token.email == 'sofianamr92@gmail.com' || resource.data.ownerUid == request.auth.uid);
+      allow create: if isValidId(payrollId) && hasRole(['ceo', 'general_manager', 'hr_manager', 'accountant']) && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+      allow update: if isValidId(payrollId) && hasRole(['ceo', 'general_manager', 'hr_manager', 'accountant']) && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate();
+      allow delete: if false;
+    }
+
+    match /auditLogs/{logId} {
+      allow get: if isValidId(logId) && isAdmin();
+      allow list: if isVerified() && request.auth.token.email == 'sofianamr92@gmail.com';
+      allow create: if isValidId(logId) && isVerified() && isValidAuditLog(incoming()) && incoming().actorUid == request.auth.uid && incoming().ownerUid == request.auth.uid && incoming().createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // Operational Module Collections (Strict Owner/Member + Verified Gates)
+    match /{colName}/{docId} {
+      allow get: if colName in [
+        'deals', 'proposals', 'contracts', 'services', 'shoots', 'equipmentReservations',
+        'editingJobs', 'designJobs', 'marketingItems', 'devItems', 'chartOfAccounts',
+        'invoices', 'payments', 'treasuryAccounts', 'treasuryTransfers',
+        'procurementRequests', 'assets', 'attendanceRecords', 'leaveRequests',
+        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs', 'notifications'
+      ] && isValidId(docId) && canReadSingleResource();
+
+      allow list: if colName in [
+        'deals', 'proposals', 'contracts', 'services', 'shoots', 'equipmentReservations',
+        'editingJobs', 'designJobs', 'marketingItems', 'devItems', 'chartOfAccounts',
+        'invoices', 'payments', 'treasuryAccounts', 'treasuryTransfers',
+        'procurementRequests', 'assets', 'attendanceRecords', 'leaveRequests',
+        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs', 'notifications'
+      ] && canReadListResource();
+
+      allow create: if colName in [
+        'deals', 'proposals', 'contracts', 'services', 'shoots', 'equipmentReservations',
+        'editingJobs', 'designJobs', 'marketingItems', 'devItems', 'chartOfAccounts',
+        'invoices', 'payments', 'treasuryAccounts', 'treasuryTransfers',
+        'procurementRequests', 'assets', 'attendanceRecords', 'leaveRequests',
+        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs', 'notifications'
+      ] && isValidId(docId) && isVerified() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == request.auth.uid && isValidTimestampsCreate();
+
+      allow update: if colName in [
+        'deals', 'proposals', 'contracts', 'services', 'shoots', 'equipmentReservations',
+        'editingJobs', 'designJobs', 'marketingItems', 'devItems', 'chartOfAccounts',
+        'invoices', 'payments', 'treasuryAccounts', 'treasuryTransfers',
+        'procurementRequests', 'assets', 'attendanceRecords', 'leaveRequests',
+        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs', 'notifications'
+      ] && isValidId(docId) && canReadSingleResource() && isValidGenericModuleRecord(incoming()) && incoming().ownerUid == existing().ownerUid && isValidTimestampsUpdate();
+
+      allow delete: if colName in [
+        'deals', 'proposals', 'contracts', 'services', 'shoots', 'equipmentReservations',
+        'editingJobs', 'designJobs', 'marketingItems', 'devItems', 'chartOfAccounts',
+        'invoices', 'payments', 'treasuryAccounts', 'treasuryTransfers',
+        'procurementRequests', 'assets', 'attendanceRecords', 'leaveRequests',
+        'supportTickets', 'files', 'knowledgeArticles', 'workflowLogs', 'notifications'
+      ] && isValidId(docId) && isAdmin();
+    }
+  }
+}
