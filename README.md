@@ -12,12 +12,22 @@ Configure in AI Studio Secrets / `.env` (never commit real secrets):
 - `GEMINI_API_KEY`: Required on the backend for `/api/v1/ai/*` endpoints.
 - `APP_URL`: Runtime Cloud Run / hosting URL.
 
+## Project Directory Structure
+- `src/assets/` — Brand SVG assets & `BRAND_ASSETS` registry
+- `src/components/` — Reusable UI (`common`, `layout`, `auth`, `pwa`, `three`)
+- `src/contexts/` (and `src/context/`) — Global state & Firebase/Demo Sandbox provider (`OSContext`)
+- `src/hooks/` — Custom hooks (`usePermissions`, `useCurrencyFormat`, `useBranchScope`, `useDebounce`)
+- `src/services/` — Client service facades (`aiService`, `firebaseService`, `exportService`)
+- `src/types/` — Domain TypeScript definitions (`os.ts`)
+- `src/utils/` — Pure accounting, RBAC, workflow, and 3D scene utilities + tests
+- `src/pages/` — Module pages mapped to Express/React Router endpoints
+
 ## Verification Commands
 ```bash
 npm run lint
 npm run build
 npm run lint:rules
-npx --yes tsx --test src/utils/accounting.test.ts src/utils/workflows.test.ts src/utils/studio3d.test.ts
+npx --yes tsx --test src/utils/accounting.test.ts src/utils/workflows.test.ts src/utils/studio3d.test.ts src/services/aiService.test.ts
 ```
 
 ## Documentation

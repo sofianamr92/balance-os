@@ -24,7 +24,7 @@ import {
   computeFinancialStatements,
   formatEGP,
 } from '../utils/accounting';
-import { auth } from '../lib/firebase';
+import { exportReportToCsv, sendAiChatRequest } from '../services';
 import type { WorkflowActionType, WorkflowTriggerType } from '../types/os';
 
 export function ReportsPage() {
@@ -75,7 +75,7 @@ export function ReportsPage() {
   }, [data.leads, data.projects, data.tasks, lang, statements.netProfitPiasters]);
 
   const handleExport = () => {
-    exportToCsv(
+    exportReportToCsv(
       'balance-os-kpi-report.csv',
       ['KPI', 'Formula', 'Data Source', 'Value'],
       kpis.map((k) => [k.name, k.formula, k.source, k.value])
@@ -301,41 +301,16 @@ export function AiAssistantPage() {
     setBusy(true);
 
     try {
-      if (isDemoMode || !auth.currentUser) {
-        // Local deterministic summary in Demo Sandbox when unauthenticated to Firebase
-        const reply =
-          lang === 'ar'
-            ? `**حقائق مؤكدة (من السجلات الحالية):**\n• الإيرادات المعتمدة: ${formatEGP(statements.totalRevenuePiasters, 'ar')}\n• صافي الربح المحاسبي: ${formatEGP(statements.netProfitPiasters, 'ar')}\n• عدد المشاريع النشطة: ${data.projects.length} (بينها ${data.projects.filter((p) => p.status === 'at_risk').length} مشروع معرض للخطر).\n\n**تقديرات:**\n• القيمة التقديرية لفرص CRM الحالية: ${formatEGP(data.leads.reduce((s, l) => s + l.estimatedBudgetPiasters, 0), 'ar')}.\n\n**توصيات مقترحة (${role.toUpperCase()}):**\n• متابعة الفواتير المتأخرة والمصروفات المعلقة بالاعتماد لرفع السيولة التشغيلية.`
-            : `**Confirmed Facts:**\n• Recognized Revenue: ${formatEGP(statements.totalRevenuePiasters, 'en')}\n• Net Profit: ${formatEGP(statements.netProfitPiasters, 'en')}\n• Projects: ${data.projects.length} (${data.projects.filter((p) => p.status === 'at_risk').length} at risk).\n\n**Recommendation:**\n• Prioritize overdue receivables and pending SoD approvals.`;
-        setMessages((m) => [...m, { sender: 'ai', text: reply }]);
-      } else {
-        const token = await auth.currentUser.getIdToken();
-        const resp = await fetch('/api/v1/ai/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            role,
-            prompt: userMsg,
-            lang,
-            contextSummary: {
-              revenuePiasters: statements.totalRevenuePiasters,
-              netProfitPiasters: statements.netProfitPiasters,
-              projectsCount: data.projects.length,
-              atRiskProjects: data.projects.filter((p) => p.status === 'at_risk').map((p) => p.name),
-              leadsCount: data.leads.length,
-              pendingApprovals: data.approvals.filter((a) => a.status === 'pending').length,
-            },
-          }),
-        });
-        const json = (await resp.json()) as { text?: string; error?: string };
-        setMessages((m) => [
-          ...m,
-          { sender: 'ai', text: json.text ?? json.error ?? 'AI service returned empty response.' },
-        ]);
-      }
+      const reply = await sendAiChatRequest({
+        role,
+        prompt: userMsg,
+        lang,
+        isDemoMode,
+        revenuePiasters: statements.totalRevenuePiasters,
+        netProfitPiasters: statements.netProfitPiasters,
+        data,
+      });
+      setMessages((m) => [...m, { sender: 'ai', text: reply }]);
     } catch (err) {
       setMessages((m) => [
         ...m,

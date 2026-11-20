@@ -14,3 +14,21 @@
 - `src/utils/studio3d.ts` & `src/components/three/*` — Interactive Three.js 3D Production Studio & Operations Twin with procedural PBR geometry, live telemetry `CanvasTexture`s, and software-WebGL protection.
 - `src/components/pwa/*` & `vite.config.ts` — Offline-ready Progressive Web App (`vite-plugin-pwa`, Web App Manifest, Service Worker caching, install prompt).
 - `server.ts` & `src/server/` — Authenticated Express API + Gemini `BALANCE INTELLIGENCE` proxy (`GEMINI_API_KEY` kept strictly server-side).
+
+## 3. Project Directory Structure
+```text
+src/
+├── assets/         # Static brand SVG/visual assets & asset registry (copied to dist/ on build)
+├── components/     # Modular UI & 3D components (auth, common, layout, pwa, three)
+├── context/        # Core OSContext provider (legacy compatibility path)
+├── contexts/       # Canonical React Context exports (OSContext)
+├── data/           # Deterministic Demo Sandbox seed dataset
+├── hooks/          # Reusable domain hooks (usePermissions, useCurrencyFormat, useBranchScope, useDebounce)
+├── i18n/           # Bilingual Arabic (RTL) & English (LTR) translations and navigation map
+├── lib/            # Firebase client initialization & connection probe
+├── pages/          # Route-level module pages across all 26 BALANCE OS workspaces
+├── server/         # Server-side Firebase Admin token verifier & Gemini AI service
+├── services/       # Client-side API, Firebase, AI, and CSV export service facades
+├── types/          # Canonical domain TypeScript contracts
+└── utils/          # Pure business logic & node:test unit suites (accounting, rbac, workflows, studio3d)
+```
